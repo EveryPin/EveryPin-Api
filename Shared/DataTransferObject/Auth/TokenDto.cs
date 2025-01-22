@@ -6,4 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.DataTransferObject.Auth;
 
-public record TokenDto(string AccessToken, string RefreshToken);
+public record TokenDto(
+    string AccessToken,
+    string RefreshToken
+);

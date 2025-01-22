@@ -6,4 +6,10 @@ using System.Threading.Tasks;
 
 namespace Shared.DataTransferObject.Auth;
 
-public record GoogleTokenDto(string? accessToken, int? expires_in, string? refreshToken, string? scope, string? id_token);
+public record GoogleTokenDto(
+    string? accessToken,
+    int? expires_in,
+    string? refreshToken,
+    string? scope,
+    string? id_token
+);

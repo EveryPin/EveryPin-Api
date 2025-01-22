@@ -6,4 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.DataTransferObject.Auth;
 
-public record RefreshMobileDto(string UserEmail, string RefreshToken);
+public record RefreshMobileDto(
+    string UserEmail,
+    string RefreshToken
+);

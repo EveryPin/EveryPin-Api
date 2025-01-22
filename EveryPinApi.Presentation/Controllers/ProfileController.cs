@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
@@ -6,6 +7,7 @@ using Shared.DataTransferObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,19 +19,22 @@ public class ProfileController : ControllerBase
 {
     private readonly ILogger _logger;
     private readonly IServiceManager _service;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ProfileController(ILogger<ProfileController> logger, IServiceManager service)
+    public ProfileController(ILogger<ProfileController> logger, IServiceManager service, IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
         _service = service;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    [HttpGet]
-    [ProducesDefaultResponseType(typeof(IEnumerable<ProfileDto>))]
-    public async Task<IActionResult> GetAllProfile()
+    [HttpGet("me")]
+    [Authorize(Roles = "NormalUser")]
+    public async Task<IActionResult> GetMyProfile()
     {
-        var profiles = await _service.ProfileService.GetAllProfile(trackChanges: false);
-        return Ok(profiles);
+        string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var profile = await _service.ProfileService.GetProfileByUserId(userId, trackChanges: false);
+        return Ok(profile);
     }
 
     [HttpGet("{userId:guid}", Name = "GetProfileByUserId")]

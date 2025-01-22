@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using ExternalLibraryService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +31,8 @@ public class TestApiController : ControllerBase
         _blobHandlingService = blobHandlingService;
     }
 
-
-    [HttpPost("regist")]
+    #region 로그인 테스트
+    [HttpPost("auth/regist")]
     //[ServiceFilter(typeof(ValidationFilterAttribute))]        
     public async Task<IActionResult> RegisterUser([FromBody] RegistUserDto registUserDto)
     {
@@ -68,7 +69,7 @@ public class TestApiController : ControllerBase
         }
     }
 
-    [HttpPost("login")]
+    [HttpPost("auth/login")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
     public async Task<IActionResult> Authenticate([FromBody] UserAutenticationDto user)
     {
@@ -81,7 +82,7 @@ public class TestApiController : ControllerBase
 
     }
 
-    [HttpGet("platform-web-login")]
+    [HttpGet("auth/platform-web-login")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
     public async Task<IActionResult> PlatformWebLogin(string code)
     {
@@ -172,16 +173,17 @@ public class TestApiController : ControllerBase
             return Unauthorized();
         }
     }
+    #endregion
 
     #region Blob Storage 테스트
-    [HttpGet("listup-blob")]
+    [HttpGet("blob/listup-blob")]
     public async Task<IActionResult> TestGetAllBlob()
     {
         var result = await _blobHandlingService.ListAsync();
         return Ok(result);
     }
 
-    [HttpPost("upload-blob")]
+    [HttpPost("blob/upload-blob")]
     public async Task<IActionResult> TestUploadToBlobStorage(IFormFile file)
     {
         var result = await _blobHandlingService.UploadAsync(file);
@@ -192,18 +194,73 @@ public class TestApiController : ControllerBase
             return Ok(result);
     }
 
-    [HttpGet("download-blob")]
+    [HttpGet("blob/download-blob")]
     public async Task<IActionResult> TestDownloadToBlobStorage(string fileName)
     {
         var result = await _blobHandlingService.DownloadAsync(fileName);
         return File(result.Content, result.ContentType, result.Name);
     }
 
-    [HttpDelete("delete-blob")]
+    [HttpDelete("blob/delete-blob")]
     public async Task<IActionResult> TestDeleteToBlobStorage(string fileName)
     {
         var result = await _blobHandlingService.DeleteAsync(fileName);
         return Ok(result);
     }
     #endregion
+
+    #region 게시글 테스트
+    [HttpGet("post/all")]
+    [Authorize(Roles = "NormalUser")]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostDto>))]
+    public async Task<IActionResult> GetAllPost()
+    {
+        var posts = await _service.PostService.GetAllPost(trackChanges: false);
+        return Ok(posts);
+    }
+    #endregion
+
+    #region 좋아요 테스트
+    [HttpGet("like/all")]
+    [Authorize(Roles = "NormalUser")]
+    [ProducesDefaultResponseType(typeof(LikeDto))]
+    public async Task<IActionResult> GetAllLike()
+    {
+        var likes = await _service.LikeService.GetAllLike(trackChanges: false);
+        return Ok(likes);
+    }
+
+    [HttpGet("like/{postId:int}", Name = "GetLikeToPostId")]
+    [ProducesDefaultResponseType(typeof(IEnumerable<LikeDto>))]
+    public async Task<IActionResult> GetLikeToPostId(int postId)
+    {
+        var likeNum = await _service.LikeService.GetLikeToPostId(postId, trackChanges: false);
+
+        return Ok(likeNum);
+    }
+
+    [HttpGet("like/num/{postId:int}", Name = "GetLikeNumToPostId")]
+    [ProducesDefaultResponseType(typeof(int))]
+    public async Task<IActionResult> GetLikeNumToPostId(int postId)
+    {
+        int likeNum = await _service.LikeService.GetLikeCountToPostId(postId, trackChanges: false);
+
+        return Ok(likeNum);
+    }
+    #endregion
+
+    #region 댓글 테스트
+
+    #endregion
+
+    #region 프로필 테스트
+    [HttpGet("profile/all")]
+    [ProducesDefaultResponseType(typeof(IEnumerable<ProfileDto>))]
+    public async Task<IActionResult> GetAllProfile()
+    {
+        var profiles = await _service.ProfileService.GetAllProfile(trackChanges: false);
+        return Ok(profiles);
+    }
+    #endregion
+
 }

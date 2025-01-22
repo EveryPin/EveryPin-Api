@@ -1,38 +1,30 @@
 ﻿using Entites.Code;
-using Entites.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
 using Shared.DataTransferObject;
 using Shared.DataTransferObject.Auth;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.DataTransferObject.InputDto.Auth;
 
 namespace EveryPinApi.Presentation.Controllers;
 
-[Route("api/authentication")]
+[Route("api/auth")]
 [ApiController]
-public class AuthenticationController : ControllerBase
+public class AuthController : ControllerBase
 {
     private readonly ILogger _logger;
     private readonly IServiceManager _service;
 
-    public AuthenticationController(ILogger<AuthenticationController> logger, IServiceManager service)
+    public AuthController(ILogger<AuthController> logger, IServiceManager service)
     {
         _logger = logger;
         _service = service;
     }
 
-    [HttpGet("login")]
+    [HttpPost("login")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> Login(string platformCode,  string accessToken)
+    public async Task<IActionResult> Login(LoginInputDto loginInputDto)
     {
         try
         {
@@ -41,15 +33,15 @@ public class AuthenticationController : ControllerBase
             // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
             SingleSignOnUserInfo userInfo = null;
 
-            switch (platformCode.ToUpper())
+            switch (loginInputDto.platformCode.ToUpper())
             {
                 case nameof(CodePlatform.KAKAO):
                     userPlatform = CodePlatform.KAKAO;
-                    userInfo = await _service.SingleSignOnService.GetKakaoUserInfo(accessToken);
+                    userInfo = await _service.SingleSignOnService.GetKakaoUserInfo(loginInputDto.accessToken);
                     break;
                 case nameof(CodePlatform.GOOGLE):
                     userPlatform = CodePlatform.GOOGLE;
-                    userInfo = await _service.SingleSignOnService.GetGoogleUserInfoToIdToken(accessToken);
+                    userInfo = await _service.SingleSignOnService.GetGoogleUserInfoToIdToken(loginInputDto.accessToken);
                     break;
                 default:
                     throw new Exception("유효한 platformCode 값이 아닙니다.");
@@ -106,7 +98,7 @@ public class AuthenticationController : ControllerBase
                 }
                 else
                 {
-                    _logger.LogError($"로그인 - 유저 생성 유효성 검사, platformCode: {platformCode}, accessToken: {accessToken}, userInfo.UserEmail: {userInfo.UserEmail}");
+                    _logger.LogError($"로그인 - 유저 생성 유효성 검사, platformCode: {loginInputDto.platformCode}, accessToken: {loginInputDto.accessToken}, userInfo.UserEmail: {userInfo.UserEmail}");
 
                     foreach (var error in registedUser.Errors)
                     {
@@ -120,8 +112,28 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError($"로그인 catch, platformCode: {platformCode}, accessToken: {accessToken}, [{ex.Message}], [{ex.StackTrace}]");
+            _logger.LogError($"로그인 catch, platformCode: {loginInputDto.platformCode}, accessToken: {loginInputDto.accessToken}, [{ex.Message}], [{ex.StackTrace}]");
             return Unauthorized();
         }
+    }
+
+    [HttpPost("refresh")]
+    [ProducesDefaultResponseType(typeof(TokenDto))]
+    public async Task<IActionResult> Refresh([FromBody] TokenDto tokenDto)
+    {
+        var tokenDtoToReturn = await _service.AuthenticationService.RefreshToken(tokenDto);
+        return Ok(tokenDtoToReturn);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        return StatusCode(501);
+    }
+
+    [HttpDelete("user")]
+    public async Task<IActionResult> DeleteUser()
+    {
+        return StatusCode(501);
     }
 }
