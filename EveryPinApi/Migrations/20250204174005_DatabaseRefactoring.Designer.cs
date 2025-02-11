@@ -12,8 +12,8 @@ using Repository;
 namespace EveryPinApi.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20241105233319_add-to-profile-TagId")]
-    partial class addtoprofileTagId
+    [Migration("20250204174005_DatabaseRefactoring")]
+    partial class DatabaseRefactoring
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,92 +27,120 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.CodeOAuthPlatform", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PlatformCode")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("PlatformCodeId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlatformCode"));
 
                     b.Property<string>("PlatformName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("PlatformCode");
 
                     b.ToTable("CodeOAuthPlatform");
 
                     b.HasData(
                         new
                         {
-                            Id = -1,
+                            PlatformCode = 1,
                             PlatformName = "NONE"
                         },
                         new
                         {
-                            Id = 1,
+                            PlatformCode = 2,
                             PlatformName = "KAKAO"
                         },
                         new
                         {
-                            Id = 2,
+                            PlatformCode = 3,
                             PlatformName = "GOOGLE"
                         });
                 });
 
             modelBuilder.Entity("Entites.Models.Comment", b =>
                 {
-                    b.Property<int>("CommentId")
+                    b.Property<int>("CommentSeq")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("CommentId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentSeq"));
 
                     b.Property<string>("CommentMessage")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("PostId")
+                    b.Property<int>("PostSeq")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("CommentSeq");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("PostSeq");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("Entites.Models.Like", b =>
+            modelBuilder.Entity("Entites.Models.Follow", b =>
                 {
-                    b.Property<int>("LikeId")
+                    b.Property<int>("FollowSeq")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("LikeId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LikeId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FollowSeq"));
 
-                    b.Property<DateTime?>("CreatedDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("PostId")
+                    b.Property<string>("FollowerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FollowingId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("FollowSeq");
+
+                    b.HasIndex("FollowerId");
+
+                    b.HasIndex("FollowingId");
+
+                    b.ToTable("Follows");
+                });
+
+            modelBuilder.Entity("Entites.Models.Like", b =>
+                {
+                    b.Property<int>("LikeSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LikeSeq"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PostSeq")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("LikeId");
+                    b.HasKey("LikeSeq");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("PostSeq");
 
                     b.HasIndex("UserId");
 
@@ -121,17 +149,16 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.Post", b =>
                 {
-                    b.Property<int>("PostId")
+                    b.Property<int>("PostSeq")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("PostId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostSeq"));
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PostContent")
@@ -144,13 +171,13 @@ namespace EveryPinApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double?>("x")
-                        .HasColumnType("float");
+                    b.Property<float?>("X")
+                        .HasColumnType("real");
 
-                    b.Property<double?>("y")
-                        .HasColumnType("float");
+                    b.Property<float?>("Y")
+                        .HasColumnType("real");
 
-                    b.HasKey("PostId");
+                    b.HasKey("PostSeq");
 
                     b.HasIndex("UserId");
 
@@ -159,48 +186,54 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.PostPhoto", b =>
                 {
-                    b.Property<int>("PostPhotoId")
+                    b.Property<int>("PostPhotoSeq")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("PostPhotoId");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostPhotoId"));
-
-                    b.Property<int?>("PostId")
                         .HasColumnType("int");
 
-                    b.Property<string>("photoUrl")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostPhotoSeq"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PhotoUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("PostPhotoId");
+                    b.Property<int>("PostSeq")
+                        .HasColumnType("int");
 
-                    b.HasIndex("PostId");
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PostPhotoSeq");
+
+                    b.HasIndex("PostSeq");
 
                     b.ToTable("PostPhotos");
                 });
 
             modelBuilder.Entity("Entites.Models.Profile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ProfileSeq")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ProfileId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProfileSeq"));
 
-                    b.Property<DateTime?>("CreatedDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SelfIntroduction")
+                    b.Property<string>("ProfileName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TagId")
+                    b.Property<string>("ProfileTag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SelfIntroduction")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -210,7 +243,7 @@ namespace EveryPinApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProfileSeq");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -224,9 +257,6 @@ namespace EveryPinApi.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CodeOAuthPlatformId")
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -246,6 +276,9 @@ namespace EveryPinApi.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("FcmToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("LastLoginDate")
                         .HasColumnType("datetime2");
 
@@ -254,9 +287,6 @@ namespace EveryPinApi.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -275,7 +305,7 @@ namespace EveryPinApi.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PlatformCodeId")
+                    b.Property<int?>("PlatformCode")
                         .HasColumnType("int");
 
                     b.Property<string>("RefreshToken")
@@ -296,8 +326,6 @@ namespace EveryPinApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CodeOAuthPlatformId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -305,6 +333,8 @@ namespace EveryPinApi.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("PlatformCode");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -338,13 +368,13 @@ namespace EveryPinApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4e0dae88-bc42-49e2-bed4-b232e7595f50",
+                            Id = "c9e1a43d-5c3b-454d-bda3-7d9f2851a536",
                             Name = "NormalUser",
                             NormalizedName = "NORMALUSER"
                         },
                         new
                         {
-                            Id = "68f7ea00-7dd6-4f08-b631-56eb6b94eea8",
+                            Id = "e62a8f80-8483-4039-8431-e9b750db9bd4",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });
@@ -460,10 +490,12 @@ namespace EveryPinApi.Migrations
                 {
                     b.HasOne("Entites.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostSeq")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Entites.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -473,11 +505,32 @@ namespace EveryPinApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Entites.Models.Follow", b =>
+                {
+                    b.HasOne("Entites.Models.User", "Follower")
+                        .WithMany("FollowingList")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entites.Models.User", "Following")
+                        .WithMany("FollowerList")
+                        .HasForeignKey("FollowingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Follower");
+
+                    b.Navigation("Following");
+                });
+
             modelBuilder.Entity("Entites.Models.Like", b =>
                 {
                     b.HasOne("Entites.Models.Post", "Post")
                         .WithMany("Likes")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostSeq")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Entites.Models.User", "User")
                         .WithMany("Like")
@@ -492,18 +545,22 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.Post", b =>
                 {
-                    b.HasOne("Entites.Models.User", null)
+                    b.HasOne("Entites.Models.User", "User")
                         .WithMany("Post")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Entites.Models.PostPhoto", b =>
                 {
                     b.HasOne("Entites.Models.Post", "Post")
                         .WithMany("PostPhotos")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostSeq")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Post");
                 });
@@ -521,9 +578,11 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.User", b =>
                 {
-                    b.HasOne("Entites.Models.CodeOAuthPlatform", null)
-                        .WithMany("User")
-                        .HasForeignKey("CodeOAuthPlatformId");
+                    b.HasOne("Entites.Models.CodeOAuthPlatform", "CodeOAuthPlatform")
+                        .WithMany("Users")
+                        .HasForeignKey("PlatformCode");
+
+                    b.Navigation("CodeOAuthPlatform");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -579,7 +638,7 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.CodeOAuthPlatform", b =>
                 {
-                    b.Navigation("User");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Entites.Models.Post", b =>
@@ -593,6 +652,12 @@ namespace EveryPinApi.Migrations
 
             modelBuilder.Entity("Entites.Models.User", b =>
                 {
+                    b.Navigation("Comments");
+
+                    b.Navigation("FollowerList");
+
+                    b.Navigation("FollowingList");
+
                     b.Navigation("Like");
 
                     b.Navigation("Post");

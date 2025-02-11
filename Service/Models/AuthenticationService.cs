@@ -83,6 +83,21 @@ internal sealed class AuthenticationService : IAuthenticationService
         return new TokenDto(accessToken, refreshToken);
     }
 
+    public async Task<TokenDto> CreateTokenWithUpdateFcmToken(string fcmToken, bool populateExp)
+    {
+        _user.FcmToken = fcmToken;
+
+        return await CreateToken(populateExp);
+    }
+
+    //public async Task<bool> ExpiringToken(string userId)
+    //{
+    //    bool result = false;
+    //
+    //    await _userManager.expired
+    //
+    //    return result;
+    //}
 
     private SigningCredentials GetSigningCredentials()
     {

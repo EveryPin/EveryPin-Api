@@ -22,7 +22,7 @@ public class CommentRepository : RepositoryBase<Comment>, ICommentRepository
         .ToListAsync();
 
     public async Task<IEnumerable<Comment>> GetCommentByPostId(int postId, bool trackChange) =>
-        await FindByCondition(comment => comment.PostId.Equals(postId), trackChange)
+        await FindByCondition(comment => comment.PostSeq.Equals(postId), trackChange)
         .OrderBy(comment => comment.CreatedDate)
         .ToListAsync();
 

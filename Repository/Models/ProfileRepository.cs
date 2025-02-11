@@ -17,7 +17,7 @@ public class ProfileRepository : RepositoryBase<Profile>, IProfileRepository
 
     public async Task<IEnumerable<Profile>> GetAllProfile(bool trackChanges) =>
         await FindAll(trackChanges)
-        .OrderBy(c => c.Id)
+        .OrderBy(c => c.UserId)
         .ToListAsync();
 
     public void CreateProfile(Profile profile) =>

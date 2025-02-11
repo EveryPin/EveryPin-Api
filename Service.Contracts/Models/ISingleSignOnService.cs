@@ -11,7 +11,7 @@ public interface ISingleSignOnService
 {
     Task<string> GetKakaoAccessToken(string code);
     Task<GoogleTokenDto> GetGoogleAccessToken(string code);
-    Task<SingleSignOnUserInfo> GetKakaoUserInfo(string accessToken);
-    Task<SingleSignOnUserInfo> GetGoogleUserInfo(string accessToken);
+    Task<SingleSignOnUserInfo> GetKakaoUserInfo(string ssoAccessToken);
+    Task<SingleSignOnUserInfo> GetGoogleUserInfo(string ssoAccessToken);
     Task<SingleSignOnUserInfo> GetGoogleUserInfoToIdToken(string googleIdToken);
 }

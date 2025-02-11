@@ -10,9 +10,9 @@ namespace Entites.Models;
 
 public class CodeOAuthPlatform
 {
-    [Column("PlatformCodeId")]
-    public int Id { get; set; }
-    [Required]
-    public string? PlatformName { get; set; }
-    public ICollection<User>? User { get; set; } = new List<User>();
+    [Key]
+    public int PlatformCode { get; set; }
+    public required string PlatformName { get; set; }
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

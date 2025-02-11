@@ -95,8 +95,7 @@ public static class ServiceExtensions
 
             // User settings.
             option.User.AllowedUserNameCharacters = string.Empty;       // 한글 사용 가능
-            //option.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-            option.User.RequireUniqueEmail = true;
+            option.User.RequireUniqueEmail = true;                     // true: 유저 이메일 중복 불가능, false: 중복 가능
         })
         .AddEntityFrameworkStores<RepositoryContext>()
         .AddDefaultTokenProviders();

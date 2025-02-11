@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,16 +10,16 @@ namespace Entites.Models;
 
 public class Comment
 {
-    [Column("CommentId")]
-    public int CommentId { get; set; }
-
-    public int? PostId { get; set; }
-    public Post? Post { get; set; }
-
-    [ForeignKey(nameof(User))]
+    [Key]
+    public int CommentSeq { get; set; }
+    public required int PostSeq { get; set; }
     public required string UserId { get; set; }
-    public User? User { get; set; }
-
     public string? CommentMessage { get; set; }
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
+    public DateTime? UpdateDate { get; set; }
+    public DateTime CreatedDate { get; set; }
+
+    [ForeignKey("PostSeq")]
+    public virtual required Post Post { get; set; }
+    [ForeignKey("UserId")]
+    public virtual required User User { get; set; }
 }

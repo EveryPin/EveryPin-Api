@@ -17,15 +17,15 @@ public class LikeRepository : RepositoryBase<Like>, ILikeRepository
 
     public async Task<IEnumerable<Like>> GetAllLike(bool trackChanges) =>
         await FindAll(trackChanges)
-        .OrderBy(c => c.LikeId)
+        .OrderBy(c => c.LikeSeq)
         .ToListAsync();
 
     public async Task<IEnumerable<Like>> GetLikeByPostId(int postId, bool trackChange) =>
-        await FindByCondition(like => like.PostId.Equals(postId), trackChange)
+        await FindByCondition(like => like.PostSeq.Equals(postId), trackChange)
         .ToListAsync();
 
     public async Task<int> GetLikeCountByPostId(int postId, bool trackChange) =>
-        (await FindByCondition(like => like.PostId.Equals(postId), trackChange)
+        (await FindByCondition(like => like.PostSeq.Equals(postId), trackChange)
         .ToListAsync()).Count;
 
     public void CreateLike(Like like) =>

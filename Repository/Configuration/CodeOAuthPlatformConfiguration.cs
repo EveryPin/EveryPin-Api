@@ -16,17 +16,17 @@ public class CodeOAuthPlatformConfiguration : IEntityTypeConfiguration<CodeOAuth
         builder.HasData(
             new CodeOAuthPlatform
             {
-                Id = -1,
+                PlatformCode = 1,
                 PlatformName = "NONE"
             },
             new CodeOAuthPlatform
             {
-                Id = 1,
+                PlatformCode = 2,
                 PlatformName = "KAKAO"
             },
             new CodeOAuthPlatform
             {
-                Id = 2,
+                PlatformCode = 3,
                 PlatformName = "GOOGLE"
             }
         );

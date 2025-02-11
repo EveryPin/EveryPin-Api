@@ -38,8 +38,8 @@ public class SingleSignOnService : ISingleSignOnService
         string accessToken = "";
         string refreshToken = "";
 
-        //string redirectURI = "http://localhost:5283/api/test/platform-web-login";  // 테스트 시 사용
-        string redirectURI = "https://everypin-api.azurewebsites.net/api/test/test-platform-web-login";
+        string redirectURI = "http://localhost:5283/api/test/auth/platform-web-login";  // 테스트 시 사용
+        //string redirectURI = "https://everypin-api.azurewebsites.net/api/test/auth/platform-web-login";
         string clientId = _configuration.GetConnectionString("kakao-rest-api-key");
         string requestURL = "https://kauth.kakao.com/oauth/token";
         string authorizationCode = "authorization_code";
@@ -92,7 +92,8 @@ public class SingleSignOnService : ISingleSignOnService
         string scope = "";
         string id_token = "";
 
-        string redirectURI = "https://everypin-api.azurewebsites.net/api/test/test-platform-web-login";
+        //string redirectURI = "https://everypin-api.azurewebsites.net/api/test/auth/platform-web-login";
+        string redirectURI = "http://localhost:5283/api/test/auth/platform-web-login";
         string clientId = _configuration.GetConnectionString("google-client-id");
         string clientSecret = _configuration.GetConnectionString("google-client-secret");
         string requestURL = "https://oauth2.googleapis.com/token";

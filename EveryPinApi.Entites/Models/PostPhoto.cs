@@ -10,11 +10,16 @@ namespace Entites.Models;
 
 public class PostPhoto
 {
-    [Column("PostPhotoId")]
-    public int PostPhotoId { get; set; }
-
-    public int? PostId { get; set; }
-    public Post? Post { get; set; }
+    [Key]
+    public int PostPhotoSeq { get; set; }
     
-    public string? photoUrl { get; set; }
+    [ForeignKey(nameof(Post))]
+    public int PostSeq { get; set; }
+
+    public string? PhotoUrl { get; set; }
+    public DateTime? UpdateDate { get; set; }
+    public DateTime CreatedDate { get; set; }
+
+    public Post? Post { get; set; }
 }
+

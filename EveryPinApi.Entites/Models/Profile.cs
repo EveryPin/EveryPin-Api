@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,18 +10,16 @@ namespace Entites.Models;
 
 public class Profile
 {
-    [Column("ProfileId")]
-    public int Id { get; set; }
-
-    [ForeignKey(nameof(User))]
+    [Key]
+    public int ProfileSeq { get; set; }
     public required string UserId { get; set; }
-    public User? User { get; set; }
-
-    public string? TagId { get; set; } = null!;
-    public string? Name { get; set; }
+    public required string ProfileTag { get; set; }
+    public required string ProfileName { get; set; }
     public string? SelfIntroduction { get; set; }
     public string? PhotoUrl { get; set; }
-    public DateTime? UpdatedDate { get; set; } = null;
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
+    public DateTime? UpdatedDate { get; set; }
+    public required DateTime CreatedDate { get; set; }
 
+    [ForeignKey("UserId")]
+    public virtual required User User { get; set; }
 }

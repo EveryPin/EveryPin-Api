@@ -52,9 +52,12 @@ public class TestApiController : ControllerBase
         var profile = new Entites.Models.Profile()
         {
             UserId = userAccountInfo.Id,
-            Name = null,
+            ProfileName = registUserDto.UserName,
             SelfIntroduction = null,
-            PhotoUrl = null
+            PhotoUrl = null,
+            ProfileTag = registUserDto.UserName,
+            User = userAccountInfo,
+            CreatedDate = DateTime.Now
         };
 
         var createdProfile = await _service.ProfileService.CreateProfile(profile);
@@ -124,7 +127,7 @@ public class TestApiController : ControllerBase
                     UserName = userInfo.UserNickName,
                     Email = userInfo.UserEmail,
                     Password = "0",
-                    PlatformCodeId = platformCode,
+                    PlatformCode = platformCode,
                     Roles = new List<string>() { "NormalUser" }
                 };
 
@@ -137,9 +140,12 @@ public class TestApiController : ControllerBase
                     var profile = new Entites.Models.Profile()
                     {
                         UserId = userAccountInfo.Id,
-                        Name = null,
+                        ProfileName = userInfo.UserNickName,
                         SelfIntroduction = null,
-                        PhotoUrl = null
+                        PhotoUrl = null,
+                        ProfileTag = userInfo.UserNickName,
+                        User = userAccountInfo,
+                        CreatedDate = DateTime.Now
                     };
 
                     var createdProfile = await _service.ProfileService.CreateProfile(profile);

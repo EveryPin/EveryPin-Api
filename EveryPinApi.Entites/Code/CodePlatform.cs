@@ -8,7 +8,7 @@ namespace Entites.Code;
 
 public enum CodePlatform
 {
-    NONE = -1,
-    KAKAO = 1,
-    GOOGLE = 2
+    NONE = 1,
+    KAKAO = 2,
+    GOOGLE = 3
 }

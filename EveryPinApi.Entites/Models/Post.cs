@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,17 +10,19 @@ namespace Entites.Models;
 
 public class Post
 {
-    [Column("PostId")]
-    public int PostId { get; set; }
-    [ForeignKey(nameof(User))]
+    [Key]
+    public int PostSeq { get; set; }
     public required string UserId { get; set; }
     public string? PostContent { get; set; }
     public string? Address { get; set; }
-    public double? x { get; set; }
-    public double? y { get; set; }
-    public ICollection<PostPhoto> PostPhotos { get; set; } = new List<PostPhoto>();
-    public ICollection<Like> Likes { get; } = new List<Like>();    
-    public ICollection<Comment> Comments { get; } = new List<Comment>();
-    public DateTime? UpdateDate { get; set; } = null;
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
+    public float? X { get; set; }
+    public float? Y { get; set; }
+    public DateTime? UpdateDate { get; set; }
+    public DateTime CreatedDate { get; set; }
+
+    [ForeignKey("UserId")]
+    public virtual required User User { get; set; }
+    public virtual ICollection<PostPhoto> PostPhotos { get; set; } = new List<PostPhoto>();
+    public virtual ICollection<Like> Likes { get; } = new List<Like>();    
+    public virtual ICollection<Comment> Comments { get; } = new List<Comment>();
 }

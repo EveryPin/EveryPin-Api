@@ -14,5 +14,6 @@ public interface IAuthenticationService
     Task<IdentityResult> RegisterUser(RegistUserDto registUserDto);
     Task<bool> ValidateUser(string userEmail);
     Task<TokenDto> CreateToken(bool populateExp);
+    Task<TokenDto> CreateTokenWithUpdateFcmToken(string fcmToken, bool populateExp);
     Task<TokenDto> RefreshToken(TokenDto tokenDto);
 }

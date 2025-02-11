@@ -86,7 +86,7 @@ internal sealed class PostService : IPostService
                 {
                     var postPhoto = new PostPhoto
                     {
-                        photoUrl = result.Blob.Uri
+                        PhotoUrl = result.Blob.Uri
                     };
                     postPhotos.Add(postPhoto);
 

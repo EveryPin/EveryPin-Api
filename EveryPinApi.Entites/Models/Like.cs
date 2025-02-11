@@ -1,5 +1,6 @@
 ﻿   using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,15 +10,15 @@ namespace Entites.Models;
 
 public class Like
 {
-    [Column("LikeId")]
-    public int LikeId { get; set; }
-
-    public int? PostId { get; set; }
-    public Post? Post { get; set; }
-
-    [ForeignKey(nameof(User))]
+    [Key]
+    public int LikeSeq { get; set; }
+    public int PostSeq { get; set; }
     public required string UserId { get; set; }
-    public User? User { get; set; }
+    public DateTime CreatedDate { get; set; }
+
+    [ForeignKey("PostSeq")]
+    public virtual Post? Post { get; set; }
+    [ForeignKey("UserId")]
+    public virtual User? User { get; set; }
     
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
 }

@@ -23,45 +23,50 @@ public class RepositoryContext : IdentityDbContext<User>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
         // 더미 데이터 생성
-        //modelBuilder.ApplyConfiguration(new UserConfiguration());
-        //modelBuilder.ApplyConfiguration(new ProfileConfiguration());
-        //modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new CodeOAuthPlatformConfiguration());
 
-        //// 선택적 1:1
-        //modelBuilder.Entity<User>()
-        //            .HasOne(user => user.Profile)
-        //            .WithOne(profile => profile.User)
-        //            .HasForeignKey<Profile>(profile => profile.UserId)
-        //            .IsRequired(false);
-        //
-        //// 일대다
-        //modelBuilder.Entity<Post>()
-        //            .HasMany(post => post.Comments)
-        //            .WithOne(comment => comment.Post)
-        //            .HasForeignKey(comment => comment.PostId);
-        //modelBuilder.Entity<Post>()
-        //            .HasMany(post => post.Likes)
-        //            .WithOne(comment => comment.Post)
-        //            .HasForeignKey(comment => comment.PostId);
-        //modelBuilder.Entity<Post>()
-        //            .HasMany(post => post.PostPhotos)
-        //            .WithOne(comment => comment.Post)
-        //            .HasForeignKey(comment => comment.PostId);
-        //
-        //// 1:1
-        //modelBuilder.Entity<Like>()
-        //            .HasOne(like => like.User)
-        //            .WithOne(user => user.)
-        //            .HasForeignKey<Profile>(profile => profile.UserId);
-        //
+
+        // Post 삭제 시, 자식(Comment, Like, PostPhoto) 자동 삭제되지 않도록 추가
+        modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Post)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(c => c.PostSeq)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Like>()
+                    .HasOne(c => c.Post)
+                    .WithMany(p => p.Likes)
+                    .HasForeignKey(c => c.PostSeq)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PostPhoto>()
+                    .HasOne(c => c.Post)
+                    .WithMany(p => p.PostPhotos)
+                    .HasForeignKey(c => c.PostSeq)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+        // Follows 엔티티 구성 예시
+        modelBuilder.Entity<Follow>()
+            .HasOne(f => f.Follower)
+            .WithMany(u => u.FollowingList)  // 사용자의 팔로우 목록(팔로워로서의 관계)
+            .HasForeignKey(f => f.FollowerId)
+            .OnDelete(DeleteBehavior.Cascade); // 원래대로 Cascade 적용 (필요에 따라 변경)
+
+        modelBuilder.Entity<Follow>()
+            .HasOne(f => f.Following)
+            .WithMany(u => u.FollowerList)  // 사용자의 팔로워 목록(팔로잉으로서의 관계)
+            .HasForeignKey(f => f.FollowingId)
+            .OnDelete(DeleteBehavior.NoAction); // Cascade 대신 NoAction으로 변경하여 순환 문제 회피
     }
 
-    public DbSet<Profile>? Profiles { get; set; }
+    //public DbSet<CodeOAuthPlatform>? CodeOAuthPlatform { get; set; }
     public DbSet<Post>? Posts { get; set; }
     public DbSet<PostPhoto>? PostPhotos { get; set; }
     public DbSet<Like>? Likes { get; set; }
     public DbSet<Comment>? Comments { get; set; }
+    public DbSet<Follow>? Follows { get; set; }
+    public DbSet<Profile>? Profiles { get; set; }
 }
