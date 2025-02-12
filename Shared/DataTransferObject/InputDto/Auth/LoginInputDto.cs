@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace Shared.DataTransferObject.InputDto.Auth;
 public record class LoginInputDto(
     string platformCode,
-    string ssoAccessToken,
+    string accessToken,
     string fcmToken
 );

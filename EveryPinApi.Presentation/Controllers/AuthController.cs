@@ -44,11 +44,11 @@ public class AuthController : ControllerBase
             {
                 case nameof(CodePlatform.KAKAO):
                     userPlatform = CodePlatform.KAKAO;
-                    userInfo = await _service.SingleSignOnService.GetKakaoUserInfo(loginInputDto.ssoAccessToken);
+                    userInfo = await _service.SingleSignOnService.GetKakaoUserInfo(loginInputDto.accessToken);
                     break;
                 case nameof(CodePlatform.GOOGLE):
                     userPlatform = CodePlatform.GOOGLE;
-                    userInfo = await _service.SingleSignOnService.GetGoogleUserInfoToIdToken(loginInputDto.ssoAccessToken);
+                    userInfo = await _service.SingleSignOnService.GetGoogleUserInfoToIdToken(loginInputDto.accessToken);
                     break;
                 default:
                     throw new Exception("유효한 platformCode 값이 아닙니다.");
@@ -109,7 +109,7 @@ public class AuthController : ControllerBase
                 }
                 else
                 {
-                    _logger.LogError($"로그인 - 유저 생성 유효성 검사, platformCode: {loginInputDto.platformCode}, ssoAccessToken: {loginInputDto.ssoAccessToken}, userInfo.UserEmail: {userInfo.UserEmail}");
+                    _logger.LogError($"로그인 - 유저 생성 유효성 검사, platformCode: {loginInputDto.platformCode}, ssoAccessToken: {loginInputDto.accessToken}, userInfo.UserEmail: {userInfo.UserEmail}");
 
                     foreach (var error in registedUser.Errors)
                     {
@@ -122,7 +122,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError($"로그인 catch, platformCode: {loginInputDto.platformCode}, ssoAccessToken: {loginInputDto.ssoAccessToken}, [{ex.Message}], [{ex.StackTrace}]");
+            _logger.LogError($"로그인 catch, platformCode: {loginInputDto.platformCode}, ssoAccessToken: {loginInputDto.accessToken}, [{ex.Message}], [{ex.StackTrace}]");
             return Unauthorized();
         }
     }
