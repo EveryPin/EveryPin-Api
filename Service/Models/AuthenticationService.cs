@@ -200,4 +200,18 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         return await CreateToken(populateExp: false);
     }
+
+    public async Task<IdentityResult> Logout(TokenDto tokenDto)
+    {
+        var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+        var userEmail = principal.FindFirst(ClaimTypes.Email);
+        var user = await _userManager.FindByEmailAsync(userEmail?.Value);
+
+        user.RefreshToken = null;
+        user.FcmToken = null;
+
+        var result = await _userManager.UpdateAsync(_user);
+
+        return result;
+    }
 }

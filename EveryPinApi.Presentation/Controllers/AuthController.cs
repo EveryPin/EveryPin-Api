@@ -136,9 +136,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout([FromBody] TokenDto tokenDto)
     {
-        return StatusCode(501);
+        var result = await _service.AuthenticationService.Logout(tokenDto);
+
+        if (result.Succeeded)
+            return Ok();
+        else
+            return result.Errors.Any(e => e.Code == "InvalidToken") ? Unauthorized() : BadRequest();
     }
 
     [HttpDelete("user")]
