@@ -81,19 +81,21 @@ public class AuthController : ControllerBase
                 if (registedUser.Succeeded && await _service.AuthenticationService.ValidateUser(userInfo.UserEmail))
                 {
                     var userAccountInfo = await _service.UserService.GetUserByEmail(userInfo.UserEmail, false);
+                    
+                    //var profile = new Entites.Models.Profile()
+                    //{
+                    //    UserId = userAccountInfo.Id,
+                    //    ProfileName = userInfo.UserNickName,
+                    //    SelfIntroduction = null,
+                    //    PhotoUrl = null,
+                    //    ProfileTag = userInfo.UserNickName,
+                    //    User = userAccountInfo,
+                    //    CreatedDate = DateTime.Now
+                    //};
+                    //
+                    //var createdProfile = await _service.ProfileService.CreateProfile(profile);
 
-                    var profile = new Entites.Models.Profile()
-                    {
-                        UserId = userAccountInfo.Id,
-                        ProfileName = userInfo.UserNickName,
-                        SelfIntroduction = null,
-                        PhotoUrl = null,
-                        ProfileTag = userInfo.UserNickName,
-                        User = userAccountInfo,
-                        CreatedDate = DateTime.Now
-                    };
-
-                    var createdProfile = await _service.ProfileService.CreateProfile(profile);
+                    var createdProfile = 1;
 
                     if (createdProfile != null)
                     {
