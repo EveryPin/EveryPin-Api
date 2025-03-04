@@ -269,4 +269,19 @@ public class TestApiController : ControllerBase
     }
     #endregion
 
+    #region Firebase 테스트
+    public async Task<IActionResult> TestFirebase(string fcmToken)
+    {
+        try
+        {
+
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        return Ok();
+    }
+    #endregion
 }
