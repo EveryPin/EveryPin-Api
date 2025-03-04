@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ExternalLibraryService;
+using Google.Apis.Auth.OAuth2;
 
 namespace EveryPinApi.Extensions;
 
@@ -67,6 +68,31 @@ public static class ServiceExtensions
         string storageAccessKey = configuration.GetConnectionString("azure-storage-access-key");
 
         services.AddSingleton(new BlobHandlingService(storageAccessKey, storageAccount, storageContainer));
+    }
+
+    public static void ConfigureFirebaseSDK(this IServiceCollection services, IConfiguration configuration)
+    {
+        string filePath = "firebase-credential.json";
+        var firebaseJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIAL");
+
+        GoogleCredential credential = null;
+
+        if (File.Exists(filePath))
+        {
+            // 로컬환경 (파일에서 읽어옴)
+            credential = GoogleCredential.FromFile(filePath);
+        }
+        else if (!string.IsNullOrEmpty(firebaseJson))
+        {
+            // Azure App Service (환경변수에서 읽어옴)
+            credential = GoogleCredential.FromJson(firebaseJson);
+        }
+        else
+        {
+            throw new Exception("Firebase 인증 정보를 찾을 수 없습니다. 파일이나 환경 변수를 확인하세요.");
+        }
+
+        services.AddSingleton(new FirebaseAdminSDKService(credential));
     }
 
     public static void ConfigureIdentity(this IServiceCollection services)

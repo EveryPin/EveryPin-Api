@@ -29,4 +29,11 @@ internal sealed class UserService : IUserService
 
         return user;
     }
+
+    public async Task<User> GetUserById(string userId, bool trackChanges)
+    {
+        var user = await _repository.User.GetUserById(userId, trackChanges);
+
+        return user;
+    }
 }
