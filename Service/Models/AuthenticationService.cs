@@ -201,14 +201,12 @@ internal sealed class AuthenticationService : IAuthenticationService
         return await CreateToken(populateExp: false);
     }
 
-    public async Task<IdentityResult> Logout(TokenDto tokenDto)
+    public async Task<IdentityResult> Logout(string userId)
     {
-        var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
-        var userEmail = principal.FindFirst(ClaimTypes.Email);
-        var user = await _userManager.FindByEmailAsync(userEmail?.Value);
+        _user = await _userManager.FindByIdAsync(userId);
 
-        user.RefreshToken = null;
-        user.FcmToken = null;
+        _user.RefreshToken = null;
+        _user.FcmToken = null;
 
         var result = await _userManager.UpdateAsync(_user);
 

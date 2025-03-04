@@ -11,4 +11,5 @@ public interface IUserRepository
 {
     Task<IEnumerable<User>> GetAllUser(bool trackChanges);
     Task<User> GetUserByEmail(string email, bool tackChanges);
+    Task<User> GetUserById(string userId, bool tackChanges);
 }

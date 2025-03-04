@@ -138,9 +138,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] TokenDto tokenDto)
+    public async Task<IActionResult> Logout()
     {
-        var result = await _service.AuthenticationService.Logout(tokenDto);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var result = await _service.AuthenticationService.Logout(userId);
 
         if (result.Succeeded)
             return Ok();

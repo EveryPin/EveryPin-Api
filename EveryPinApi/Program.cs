@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureServiceManager();         // ServiceManager 추가
     builder.Services.ConfigureSqlContext(builder.Configuration);
     builder.Services.ConfigureBlobStorage(builder.Configuration);   // Blob Storage 서비스 등록
+    builder.Services.ConfigureFirebaseSDK(builder.Configuration);   // Firebase Admin SDK 서비스 등록
 
     // Presentation Layer에서 ControllerBase 상속 가능하도록
     builder.Services.AddControllers()

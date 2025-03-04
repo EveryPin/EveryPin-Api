@@ -20,7 +20,11 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
         .OrderBy(c => c.Id)
         .ToListAsync();
 
-    public async Task<User> GetUserByEmail(string email, bool tackChanges) =>
-        await FindByCondition(u => u.Email.Equals(email), tackChanges)
+    public async Task<User> GetUserByEmail(string email, bool trackChanges) =>
+        await FindByCondition(u => u.Email.Equals(email), trackChanges)
+        .SingleOrDefaultAsync();
+
+    public async Task<User> GetUserById(string userId, bool trackChanges) =>
+        await FindByCondition(u => u.Id.Equals(userId), trackChanges)
         .SingleOrDefaultAsync();
 }

@@ -2,6 +2,7 @@
 using ExternalLibraryService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using Shared.DataTransferObject.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,13 +24,17 @@ public class TestApiController : ControllerBase
 {
     private readonly ILogger _logger;
     private readonly IServiceManager _service;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly BlobHandlingService _blobHandlingService;
+    private readonly FirebaseAdminSDKService _firebaseAdminSDKService;
 
-    public TestApiController(ILogger<TestApiController> logger, IServiceManager service, BlobHandlingService blobHandlingService)
+    public TestApiController(ILogger<TestApiController> logger, IServiceManager service, IHttpContextAccessor httpContextAccessor, BlobHandlingService blobHandlingService, FirebaseAdminSDKService firebaseAdminSDKService)
     {
         _logger = logger;
         _service = service;
         _blobHandlingService = blobHandlingService;
+        _firebaseAdminSDKService = firebaseAdminSDKService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     #region 로그인 테스트
@@ -269,4 +275,36 @@ public class TestApiController : ControllerBase
     }
     #endregion
 
+    #region Firebase 테스트
+    [HttpPost("firebase/send-message-to-user")]
+    public async Task<IActionResult> SendMessageToUser(string userFcmToken, string title, string body)
+    {
+        var result = await _firebaseAdminSDKService.SendMessageToUser(userFcmToken, title, body);
+
+        return Ok(result);
+    }
+
+    [HttpPost("firebase/send-message-to-many-user")]
+    public async Task<IActionResult> SendMessageToManyUser(List<string> userFcmTokens, string title, string body)
+    {
+        var result = await _firebaseAdminSDKService.SendMessageToManyUser(userFcmTokens, title, body);
+
+        return Ok(result);
+    }
+
+    [HttpPost("firebase/send-message-to-me")]
+    [Authorize(Roles = "NormalUser")]
+    public async Task<IActionResult> SendMessageToMe(string title, string body)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var user = await _service.UserService.GetUserById(userId, false);
+
+        var result = await _firebaseAdminSDKService.SendMessageToUser(user.FcmToken, title, body);
+
+        return Ok(result);
+    }
+
+
+    #endregion
 }
