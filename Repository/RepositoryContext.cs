@@ -33,19 +33,19 @@ public class RepositoryContext : IdentityDbContext<User>
         modelBuilder.Entity<Comment>()
                     .HasOne(c => c.Post)
                     .WithMany(p => p.Comments)
-                    .HasForeignKey(c => c.PostSeq)
+                    .HasForeignKey(c => c.PostId)
                     .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Like>()
                     .HasOne(c => c.Post)
                     .WithMany(p => p.Likes)
-                    .HasForeignKey(c => c.PostSeq)
+                    .HasForeignKey(c => c.PostId)
                     .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<PostPhoto>()
                     .HasOne(c => c.Post)
                     .WithMany(p => p.PostPhotos)
-                    .HasForeignKey(c => c.PostSeq)
+                    .HasForeignKey(c => c.PostId)
                     .OnDelete(DeleteBehavior.NoAction);
 
         // Follows 엔티티 구성 예시

@@ -17,12 +17,12 @@ public class PostPhotoRepository : RepositoryBase<PostPhoto>, IPostPhotoReposito
 
     public async Task<IEnumerable<PostPhoto>> GetAllPostPhoto(bool trackChanges) =>
         await FindAll(trackChanges)
-        .OrderBy(c => c.PostPhotoSeq)
+        .OrderBy(c => c.PostPhotoId)
         .ToListAsync();
 
     public async Task<IEnumerable<PostPhoto>> GetPostPhotoByPostId(int postId, bool trackChange) =>
-        await FindByCondition(postPhoto => postPhoto.PostSeq.Equals(postId), trackChange)
-        .OrderBy(postPhoto => postPhoto.PostSeq)
+        await FindByCondition(postPhoto => postPhoto.PostId.Equals(postId), trackChange)
+        .OrderBy(postPhoto => postPhoto.PostId)
         .ToListAsync();
 
     public void CreatePostPhoto(PostPhoto postphoto) =>
@@ -31,9 +31,9 @@ public class PostPhotoRepository : RepositoryBase<PostPhoto>, IPostPhotoReposito
     public async Task<int> GetLatestPostPhotoId()
     {
         var latestPostPhoto = await FindAll(trackChanges: false)
-            .OrderByDescending(c => c.PostPhotoSeq)
+            .OrderByDescending(c => c.PostPhotoId)
             .FirstOrDefaultAsync();
 
-        return latestPostPhoto?.PostPhotoSeq ?? 0;
+        return latestPostPhoto?.PostPhotoId ?? 0;
     }
 }

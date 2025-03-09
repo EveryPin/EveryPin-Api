@@ -11,10 +11,10 @@ namespace Entites.Models;
 public class PostPhoto
 {
     [Key]
-    public int PostPhotoSeq { get; set; }
+    public int PostPhotoId { get; set; }
     
     [ForeignKey(nameof(Post))]
-    public int PostSeq { get; set; }
+    public int PostId { get; set; }
 
     public string? PhotoUrl { get; set; }
     public DateTime? UpdateDate { get; set; }

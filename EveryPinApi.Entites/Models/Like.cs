@@ -11,12 +11,12 @@ namespace Entites.Models;
 public class Like
 {
     [Key]
-    public int LikeSeq { get; set; }
-    public int PostSeq { get; set; }
+    public int LikeId { get; set; }
+    public int PostId { get; set; }
     public required string UserId { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    [ForeignKey("PostSeq")]
+    [ForeignKey("PostId")]
     public virtual Post? Post { get; set; }
     [ForeignKey("UserId")]
     public virtual User? User { get; set; }
