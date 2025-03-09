@@ -11,14 +11,14 @@ namespace Entites.Models;
 public class Comment
 {
     [Key]
-    public int CommentSeq { get; set; }
-    public required int PostSeq { get; set; }
+    public int CommentId { get; set; }
+    public required int PostId { get; set; }
     public required string UserId { get; set; }
     public string? CommentMessage { get; set; }
     public DateTime? UpdateDate { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    [ForeignKey("PostSeq")]
+    [ForeignKey("PostId")]
     public virtual required Post Post { get; set; }
     [ForeignKey("UserId")]
     public virtual required User User { get; set; }

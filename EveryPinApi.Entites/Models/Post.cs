@@ -11,7 +11,7 @@ namespace Entites.Models;
 public class Post
 {
     [Key]
-    public int PostSeq { get; set; }
+    public int PostId { get; set; }
     public required string UserId { get; set; }
     public string? PostContent { get; set; }
     public string? Address { get; set; }

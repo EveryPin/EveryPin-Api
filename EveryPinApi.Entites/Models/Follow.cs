@@ -10,7 +10,7 @@ namespace Entites.Models;
 public class Follow
 {
     [Key]
-    public int FollowSeq { get; set; }
+    public int FollowId { get; set; }
     public required string FollowerId { get; set; }
     public required string FollowingId { get; set; }
     public DateTime CreatedDate { get; set; }

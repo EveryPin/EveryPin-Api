@@ -11,7 +11,7 @@ namespace Entites.Models;
 public class Profile
 {
     [Key]
-    public int ProfileSeq { get; set; }
+    public int ProfileId { get; set; }
     public required string UserId { get; set; }
     public required string ProfileTag { get; set; }
     public required string ProfileName { get; set; }

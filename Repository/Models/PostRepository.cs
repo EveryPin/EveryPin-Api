@@ -18,11 +18,11 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
 
     public async Task<IEnumerable<Post>> GetAllPost(bool trackChanges) =>
         await FindAll(trackChanges)
-        .OrderBy(c => c.PostSeq)
+        .OrderBy(c => c.PostId)
         .ToListAsync();
 
     public async Task<Post> GetPostById(int postId, bool trackChanges) =>
-        await FindByCondition(post => post.PostSeq.Equals(postId), trackChanges)
+        await FindByCondition(post => post.PostId.Equals(postId), trackChanges)
         .Include(post => post.PostPhotos)
         .SingleOrDefaultAsync();
 
@@ -33,7 +33,7 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
                            post.Y.HasValue &&
                            Math.Pow(post.X.Value - x, 2) + Math.Pow(post.Y.Value - y, 2) <= Math.Pow(range, 2))
             .Include(post => post.PostPhotos)
-            .OrderBy(c => c.PostSeq)
+            .OrderBy(c => c.PostId)
             .ToListAsync();
 
         return posts;
