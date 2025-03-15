@@ -17,6 +17,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Reflection.Metadata.Ecma335;
+using Entites.Code;
+using Google.Apis.PeopleService.v1.Data;
 
 namespace Service.Models;
 
@@ -25,12 +27,28 @@ public class SingleSignOnService : ISingleSignOnService
     private readonly IConfiguration _configuration;
     private readonly IRepositoryManager _repositoryManager;
     private readonly ILogger<SingleSignOnService> _logger;
+    private readonly Dictionary<string, Func<string, Task<SingleSignOnUserInfo>>> _platformStrategies;
 
     public SingleSignOnService(ILogger<SingleSignOnService> logger, IConfiguration configuration, IRepositoryManager repositoryManager) 
     {
         _logger = logger;
         _configuration = configuration;
         _repositoryManager = repositoryManager;
+        _platformStrategies = new Dictionary<string, Func<string, Task<SingleSignOnUserInfo>>>
+        {
+            { nameof(CodePlatform.KAKAO), this.GetKakaoUserInfo },
+            { nameof(CodePlatform.GOOGLE), this.GetGoogleUserInfoToIdToken }
+        };
+    }
+
+    public async Task<SingleSignOnUserInfo> GetUserInfo(string platformCode, string accessToken)
+    {
+        if (!_platformStrategies.TryGetValue(platformCode.ToUpper(), out var strategy))
+        {
+            throw new Exception($"지원되지 않는 플랫폼: {platformCode}");
+        }
+
+        return await strategy(accessToken);
     }
 
     public async Task<string> GetKakaoAccessToken(string code)
@@ -156,8 +174,8 @@ public class SingleSignOnService : ISingleSignOnService
     }
 
     public async Task<SingleSignOnUserInfo> GetKakaoUserInfo(string kakaoAccessToken)
-
     {
+        var result = new SingleSignOnUserInfo() { PlatformCode = CodePlatform.KAKAO };
         string postURL = "https://kapi.kakao.com/v2/user/me";
 
         // HTTP 요청 생성
@@ -185,10 +203,10 @@ public class SingleSignOnService : ISingleSignOnService
                         JsonElement kakao_account = root.GetProperty("kakao_account");
                         JsonElement profile = kakao_account.GetProperty("profile");
 
-                        string nickname = profile.GetProperty("nickname").GetString();
-                        string email = kakao_account.GetProperty("email").GetString();
-
-                        return new SingleSignOnUserInfo() { UserNickName =  nickname, UserEmail = email};
+                        result.UserNickName = profile.GetProperty("nickname").GetString();
+                        result.UserEmail = kakao_account.GetProperty("email").GetString();
+                        
+                        return result;
                     }
                     catch(Exception ex)
                     {
@@ -257,6 +275,7 @@ public class SingleSignOnService : ISingleSignOnService
 
     public async Task<SingleSignOnUserInfo> GetGoogleUserInfoToIdToken(string googleIdToken)
     {
+        var result = new SingleSignOnUserInfo() { PlatformCode = CodePlatform.GOOGLE };
         string googleClientId = _configuration.GetConnectionString("google-client-id");
 
         var settings = new GoogleJsonWebSignature.ValidationSettings()
@@ -269,12 +288,9 @@ public class SingleSignOnService : ISingleSignOnService
         string userName = payload.Name;
         string userEmail = payload.Email;
 
-        SingleSignOnUserInfo userInfo = new SingleSignOnUserInfo()
-        {
-            UserNickName = userName,
-            UserEmail = userEmail
-        };
+        result.UserNickName = userName;
+        result.UserEmail = userEmail;
 
-        return userInfo;
+        return result;
     }
 }

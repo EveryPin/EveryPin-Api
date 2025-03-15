@@ -1,4 +1,5 @@
 ﻿using Entites.Models;
+using Shared.DataTransferObject.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Service.Contracts.Models;
 
 public interface IUserService
 {
+    Task<User> RegistNewUser(SingleSignOnUserInfo userInfo, string fcmToken);
     Task<User> GetUserByEmail(string email, bool trackChanges);
     Task<User> GetUserById(string userId, bool trackChanges);
 }

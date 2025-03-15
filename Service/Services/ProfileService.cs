@@ -34,16 +34,26 @@ internal sealed class ProfileService : IProfileService
         return profilesDto;
     }
 
+    public async Task<Entites.Models.Profile> RegistNewProfile(User user)
+    {
+        var newProfile = new Entites.Models.Profile
+        {
+            User = user,
+            UserId = user.Id,
+            ProfileTag = user.UserName,
+            ProfileName = user.UserName,
+            CreatedDate = DateTime.Now
+        };
+
+        await CreateProfile(newProfile);
+    }
+
     public async Task<Entites.Models.Profile> CreateProfile(Entites.Models.Profile profile)
     {
         if (profile != null)
         {
             _repository.Profile.CreateProfile(profile);
             await _repository.SaveAsync();
-        }
-        else
-        {
-
         }
 
         return profile;
