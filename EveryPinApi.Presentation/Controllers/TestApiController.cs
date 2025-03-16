@@ -92,128 +92,6 @@ public class TestApiController : ControllerBase
 
     }
 
-    [HttpGet("auth/platform-web-login")]
-    [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> PlatformWebLogin(string code)
-    {
-        #region 
-        //byte platformCode = 2;
-        //
-        //try
-        //{
-        //    // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        //    SingleSignOnUserInfo userInfo = null;
-        //
-        //    switch (platformCode)
-        //    {
-        //        case 2:
-        //            string kakaoAccessToken = await _service.SingleSignOnService.GetKakaoAccessToken(code);
-        //            userInfo = await _service.SingleSignOnService.GetKakaoUserInfo(kakaoAccessToken);
-        //            break;
-        //        case 3:
-        //            GoogleTokenDto googleAccessToken = await _service.SingleSignOnService.GetGoogleAccessToken(code);
-        //            userInfo = await _service.SingleSignOnService.GetGoogleUserInfo(googleAccessToken.accessToken);
-        //            break;
-        //        default:
-        //            throw new Exception("유효한 platformCode 값이 아닙니다.");
-        //    }
-        //
-        //    // 만일, DB에 해당 email을 가지는 유저가 없으면 회원가입 시키고 유저 식별자와 JWT 반환
-        //    var user = await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
-        //
-        //    if (user)
-        //    {
-        //        var tokenDto = await _service.AuthenticationService.CreateToken(populateExp: true);
-        //
-        //        return Ok(tokenDto);
-        //    }
-        //    else
-        //    {
-        //        RegistUserDto registerUser = new RegistUserDto()
-        //        {
-        //            Name = userInfo.UserNickName,
-        //            UserName = userInfo.UserNickName,
-        //            Email = userInfo.UserEmail,
-        //            Password = "0",
-        //            PlatformCode = platformCode,
-        //            Roles = new List<string>() { "NormalUser" }
-        //        };
-        //
-        //        IdentityResult registedUser = await _service.AuthenticationService.RegisterUser(registerUser);
-        //
-        //        if (registedUser.Succeeded && await _service.AuthenticationService.ValidateUser(userInfo.UserEmail))
-        //        {
-        //            var userAccountInfo = await _service.UserService.GetUserByEmail(userInfo.UserEmail, false);
-        //
-        //            var profile = new Entites.Models.Profile()
-        //            {
-        //                UserId = userAccountInfo.Id,
-        //                ProfileName = userInfo.UserNickName,
-        //                SelfIntroduction = null,
-        //                PhotoUrl = null,
-        //                ProfileTag = userInfo.UserNickName,
-        //                User = userAccountInfo,
-        //                CreatedDate = DateTime.Now
-        //            };
-        //
-        //            var createdProfile = await _service.ProfileService.CreateProfile(profile);
-        //
-        //            if (createdProfile != null)
-        //            {
-        //                var tokenDto = await _service.AuthenticationService.CreateToken(populateExp: true);
-        //
-        //                return Ok(tokenDto);
-        //            }
-        //            else
-        //            {
-        //                _logger.LogError($"테스트 프로필 생성 실패 - userId: {userAccountInfo.Id}");
-        //                return BadRequest("테스트 프로필 생성에 실패하였습니다.");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            foreach (var error in registedUser.Errors)
-        //            {
-        //                _logger.LogError($"테스트 Code: {error.Code}, Description: {error.Description}");
-        //            }
-        //
-        //            return Unauthorized();
-        //        }
-        //    }
-        //
-        //}
-        //catch (Exception ex)
-        //{
-        //    return Unauthorized();
-        //}
-        #endregion
-
-        string platformCode = "google";
-        
-        // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, code);
-        if (userInfo == null) throw new UnauthorizedAccessException("SSO 인증 실패");
-        
-        // 사용자 검증 및 회원가입
-        bool isUserExist = await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
-        if (!isUserExist)
-        {
-            var user = await _service.UserService.RegistNewUser(userInfo, "");
-        
-            await _service.ProfileService.CreateProfile(new Profile
-            {
-                UserId = user.Id,
-                ProfileTag = user.UserName,
-                ProfileName = user.UserName,
-                CreatedDate = DateTime.Now,
-                User = user
-            });
-        }
-        
-        var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);
-        return Ok(tokenDto);
-    }
-
     [HttpGet("auth/kakao-web-login")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
     public async Task<IActionResult> KakaoWebLogin(string code)
@@ -252,16 +130,8 @@ public class TestApiController : ControllerBase
         bool isUserExist = await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         if (!isUserExist)
         {
-            var user = await _service.UserService.RegistNewUser(userInfo, "");
-
-            await _service.ProfileService.CreateProfile(new Profile
-            {
-                UserId = user.Id,
-                ProfileTag = user.UserName,
-                ProfileName = user.UserName,
-                CreatedDate = DateTime.Now,
-                User = user
-            });
+            string fcmToken = ""; // 웹 테스트 용도라서 빈문자열로
+            var user = await _service.UserService.RegistNewUser(userInfo, fcmToken);
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);
