@@ -1,5 +1,4 @@
 using EveryPinApi.Extensions;
-using Service;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +8,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 {
     // Add services to the container.
+    builder.Services.AddSingleton(builder.Environment);
     builder.Services.ConfigureCors();       // CORS
     builder.Services.ConfigureRepositoryManager();      // RepositoryManager 추가
     builder.Services.ConfigureServiceManager();         // ServiceManager 추가
@@ -24,7 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(option =>
     {
-        option.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+        option.SwaggerDoc("v1", new OpenApiInfo { Title = "EveryPin API", Version = "v1" });
         option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             In = ParameterLocation.Header,
@@ -65,7 +65,6 @@ var builder = WebApplication.CreateBuilder(args);
 
     // AutoMapper
     builder.Services.AddAutoMapper(typeof(Program));
-
 }
 
 var app = builder.Build();

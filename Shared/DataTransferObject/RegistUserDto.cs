@@ -15,5 +15,6 @@ public record RegistUserDto
     public string? PhoneNumber { get; init; }
     public int? PlatformCode { get; init; }
     public string? FcmToken { get; init; }
+    public DateTime? CreatedDate { get; set; }
     public ICollection<string>? Roles { get; init; }
 }

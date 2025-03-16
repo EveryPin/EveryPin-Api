@@ -21,15 +21,18 @@ internal sealed class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
 
-    public UserService(ILogger<UserService> logger, IRepositoryManager repository, UserManager<User> userManager)
+    public UserService(ILogger<UserService> logger, IRepositoryManager repository, UserManager<User> userManager, IMapper mapper)
     {
         _logger = logger;
         _repository = repository;
         _userManager = userManager;
+        _mapper = mapper;
     }
 
     public async Task<User> RegistNewUser(SingleSignOnUserInfo userInfo, string fcmToken)
     {
+        
+
         var newUser = new RegistUserDto
         {
             Name = userInfo.UserNickName,
@@ -38,15 +41,28 @@ internal sealed class UserService : IUserService
             Password = "0",
             PlatformCode = (int)userInfo.PlatformCode,
             FcmToken = fcmToken,
-            Roles = new List<string> { "NormalUser" }
+            Roles = new List<string> { "NormalUser" },
+            CreatedDate = DateTime.Now
         };
 
-        var result = await this.RegisterUser(newUser);
+        var user = _mapper.Map<User>(newUser);
 
-        if (!result.Succeeded)
+        var profile = new Entites.Models.Profile()
         {
+            UserId = user.Id,
+            ProfileTag = user.UserName,
+            ProfileName = user.UserName,
+            CreatedDate = DateTime.Now,
+            User = user
+        };
+        user.Profile = profile;
+
+        var userCreateresult = await _userManager.CreateAsync(user, newUser.Password ?? "0");
+
+        if (userCreateresult.Succeeded)
+            await _userManager.AddToRolesAsync(user, newUser.Roles);
+        else
             throw new Exception("회원가입 실패");
-        }
 
         return await this.GetUserByEmail(userInfo.UserEmail, false);
     }
@@ -63,14 +79,5 @@ internal sealed class UserService : IUserService
         var user = await _repository.User.GetUserById(userId, trackChanges);
 
         return user;
-    }
-
-    public async Task<IdentityResult> RegisterUser(RegistUserDto registUserDto)
-    {
-        var user = _mapper.Map<User>(registUserDto);
-        var result = await _userManager.CreateAsync(user, registUserDto.Password ?? "0");
-        if (result.Succeeded)
-            await _userManager.AddToRolesAsync(user, registUserDto.Roles);
-        return result;
     }
 }

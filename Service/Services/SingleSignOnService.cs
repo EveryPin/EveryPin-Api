@@ -28,6 +28,12 @@ public class SingleSignOnService : ISingleSignOnService
     private readonly IRepositoryManager _repositoryManager;
     private readonly ILogger<SingleSignOnService> _logger;
     private readonly Dictionary<string, Func<string, Task<SingleSignOnUserInfo>>> _platformStrategies;
+    private string kakaoRedirectURI;
+    private string kakaoClientId;
+    private string googleRedirectURI;
+    private string googleClientId;
+    private string googleClientSecret;
+
 
     public SingleSignOnService(ILogger<SingleSignOnService> logger, IConfiguration configuration, IRepositoryManager repositoryManager) 
     {
@@ -39,6 +45,14 @@ public class SingleSignOnService : ISingleSignOnService
             { nameof(CodePlatform.KAKAO), this.GetKakaoUserInfo },
             { nameof(CodePlatform.GOOGLE), this.GetGoogleUserInfoToIdToken }
         };
+
+        string serverHost = _configuration["ASPNETCORE_URLS"];
+
+        kakaoRedirectURI = $"{serverHost}/api/test/auth/kakao-web-login";
+        googleRedirectURI = $"{serverHost}/api/test/auth/google-web-login";
+        kakaoClientId = _configuration.GetConnectionString("kakao-rest-api-key");
+        googleClientId = _configuration.GetConnectionString("google-client-id");
+        googleClientSecret = _configuration.GetConnectionString("google-client-secret");
     }
 
     public async Task<SingleSignOnUserInfo> GetUserInfo(string platformCode, string accessToken)
@@ -54,17 +68,12 @@ public class SingleSignOnService : ISingleSignOnService
     public async Task<string> GetKakaoAccessToken(string code)
     {
         string accessToken = "";
-        string refreshToken = "";
-
-        string redirectURI = "http://localhost:5283/api/test/auth/platform-web-login";  // 테스트 시 사용
-        //string redirectURI = "https://everypin-api.azurewebsites.net/api/test/auth/platform-web-login";
-        string clientId = _configuration.GetConnectionString("kakao-rest-api-key");
+        //string refreshToken = "";
         string requestURL = "https://kauth.kakao.com/oauth/token";
         string authorizationCode = "authorization_code";
-
         string queryString = $"?grant_type={authorizationCode}" +
-                             $"&client_id={clientId}" +
-                             $"&redirect_uri={redirectURI}" +
+                             $"&client_id={kakaoClientId}" +
+                             $"&redirect_uri={kakaoRedirectURI}" +
                              $"&code={code}";
 
         // HTTP 요청 생성
@@ -89,7 +98,7 @@ public class SingleSignOnService : ISingleSignOnService
                         JsonElement root = jsonDocument.RootElement;
 
                         accessToken = root.GetProperty("access_token").GetString();
-                        refreshToken = root.GetProperty("refresh_token").GetString();
+                        //refreshToken = root.GetProperty("refresh_token").GetString();
                     }
                 }
             }
@@ -104,24 +113,14 @@ public class SingleSignOnService : ISingleSignOnService
 
     public async Task<GoogleTokenDto> GetGoogleAccessToken(string code)
     {
-        string accessToken = "";
-        int expires_in = 0;
-        string refreshToken = "";
-        string scope = "";
-        string id_token = "";
-
-        //string redirectURI = "https://everypin-api.azurewebsites.net/api/test/auth/platform-web-login";
-        string redirectURI = "http://localhost:5283/api/test/auth/platform-web-login";
-        string clientId = _configuration.GetConnectionString("google-client-id");
-        string clientSecret = _configuration.GetConnectionString("google-client-secret");
         string requestURL = "https://oauth2.googleapis.com/token";
         string authorizationCode = "authorization_code";
 
-        string postData = $"client_id={clientId}" +
-                                $"&client_secret={clientSecret}" +
+        string postData = $"client_id={googleClientId}" +
+                                $"&client_secret={googleClientSecret}" +
                                 $"&code={code}" +
                                 $"&grant_type={authorizationCode}" +
-                                $"&redirect_uri={redirectURI}";
+                                $"&redirect_uri={googleRedirectURI}";
 
         // HTTP 요청 생성
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestURL);
@@ -131,7 +130,6 @@ public class SingleSignOnService : ISingleSignOnService
         {
             writer.Write(postData);
         }
-
 
         try
         {
@@ -152,11 +150,11 @@ public class SingleSignOnService : ISingleSignOnService
 
 
 
-                        accessToken = root.GetProperty("access_token").GetString();
-                        expires_in = root.GetProperty("expires_in").GetInt32();
-                        refreshToken = root.GetProperty("refresh_token").GetString();
-                        scope = root.GetProperty("scope").GetString();
-                        id_token = root.GetProperty("id_token").GetString();
+                        string accessToken = root.GetProperty("access_token").GetString();
+                        int expires_in = root.GetProperty("expires_in").GetInt32();
+                        string refreshToken = root.GetProperty("refresh_token").GetString();
+                        string scope = root.GetProperty("scope").GetString();
+                        string id_token = root.GetProperty("id_token").GetString();
 
                         return new GoogleTokenDto(accessToken, expires_in, refreshToken, scope, id_token);
                     }

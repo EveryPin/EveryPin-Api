@@ -45,7 +45,7 @@ internal sealed class ProfileService : IProfileService
             CreatedDate = DateTime.Now
         };
 
-        await CreateProfile(newProfile);
+        return await CreateProfile(newProfile);
     }
 
     public async Task<Entites.Models.Profile> CreateProfile(Entites.Models.Profile profile)
