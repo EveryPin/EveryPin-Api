@@ -16,7 +16,7 @@ public class MappingProfile : AutoMapper.Profile
         .ForMember(dest => dest.PostPhotos, opt => opt.MapFrom(src => src.PostPhotos));
 
         CreateMap<PostPhoto, PostPhotoDto>()
-            .ForMember(dest => dest.PostPhotoId, opt => opt.MapFrom(src => src.PostPhotoId))
+            .ForMember(dest => dest.PostPhotoId, opt => opt.MapFrom(src => src.PostId))
             .ForMember(dest => dest.photoUrl, opt => opt.MapFrom(src => src.PhotoUrl));
 
 
