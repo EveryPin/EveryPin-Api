@@ -31,8 +31,6 @@ internal sealed class UserService : IUserService
 
     public async Task<User> RegistNewUser(SingleSignOnUserInfo userInfo, string fcmToken)
     {
-        
-
         var newUser = new RegistUserDto
         {
             Name = userInfo.UserNickName,
