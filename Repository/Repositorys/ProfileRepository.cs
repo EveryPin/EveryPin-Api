@@ -23,6 +23,9 @@ public class ProfileRepository : RepositoryBase<Profile>, IProfileRepository
     public void CreateProfile(Profile profile) =>
         Create(profile);
 
+    public void UpdateProfile(Profile profile) =>
+        Update(profile);
+
     public async Task<Profile> GetProfileByUserId(string userId, bool trackChanges) =>
         await FindByCondition(profile => profile.UserId.Equals(userId), trackChanges)
         .SingleOrDefaultAsync();

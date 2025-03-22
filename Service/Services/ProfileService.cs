@@ -4,6 +4,7 @@ using Entites.Models;
 using Microsoft.Extensions.Logging;
 using Service.Models;
 using Shared.DataTransferObject;
+using Shared.DataTransferObject.InputDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,5 +66,23 @@ internal sealed class ProfileService : IProfileService
         //var profileDto = _mapper.Map<ProfileDto>(profile);
 
         return profile;
+    }
+
+    public async Task<Entites.Models.Profile> UpdateProfile(string userId, ProfileInputDto updateProfile)
+    {
+        Entites.Models.Profile originProfile = await GetProfileByUserId(userId, false);
+
+        if (originProfile != null)
+        {
+            originProfile.ProfileTag = updateProfile.TagId;
+            originProfile.ProfileName = updateProfile.Name;
+            originProfile.SelfIntroduction = updateProfile.SelfIntroduction;
+            originProfile.PhotoUrl = updateProfile.PhotoUrl;
+
+            _repository.Profile.UpdateProfile(originProfile);
+            await _repository.SaveAsync();
+        }
+    
+        return originProfile;
     }
 }
