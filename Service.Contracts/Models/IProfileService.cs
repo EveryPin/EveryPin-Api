@@ -1,5 +1,6 @@
 ﻿using Entites.Models;
 using Shared.DataTransferObject;
+using Shared.DataTransferObject.InputDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,5 @@ public interface IProfileService
     Task<IEnumerable<ProfileDto>> GetAllProfile(bool trackChanges);
     Task<Profile> CreateProfile(Profile profile);
     Task<Profile> GetProfileByUserId(string userId, bool trackChanges);
-    Task<Profile> UpdateProfile(string userId, Profile profile);
+    Task<Profile> UpdateProfile(string userId, ProfileInputDto updateProfile);
 }
