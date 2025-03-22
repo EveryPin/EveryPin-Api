@@ -73,7 +73,7 @@ public class PostController : ControllerBase
     /// <param name="postId"></param>
     /// <param name="inputPost"></param>
     /// <returns></returns>
-    [HttpPut("{postId:int}", Name = "UpdatePost")]
+    [HttpPatch("{postId:int}", Name = "UpdatePost")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> UpdatePost(int postId,
                                                [FromBody] CreatePostInputDto inputPost)
@@ -180,7 +180,7 @@ public class PostController : ControllerBase
     /// <param name="commentId"></param>
     /// <param name="commentMessage"></param>
     /// <returns></returns>
-    [HttpPut("{postId:int}/comment/{commentId:int}", Name = "UpdateComment")]
+    [HttpPatch("{postId:int}/comment/{commentId:int}", Name = "UpdateComment")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> UpdateComment(int postId,
                                                    int commentId,

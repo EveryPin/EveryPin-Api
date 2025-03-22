@@ -10,5 +10,6 @@ public class ProfileInputDto
 {
     public string? TagId;
     public string? Name;
-    public string SelfIntroduction = null!;
+    public string? SelfIntroduction;
+    public string? PhotoUrl;
 }

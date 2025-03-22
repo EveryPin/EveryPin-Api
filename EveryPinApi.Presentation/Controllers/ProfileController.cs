@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
 using Shared.DataTransferObject;
+using Shared.DataTransferObject.InputDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,17 +46,19 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    //[HttpPut("{userId:guid}")]
-    //[Authorize(Roles = "NormalUser")]
-    //public async Task<IActionResult> UpdateProfile(string userId, [FromBody] ProfileInputDto profileInputDto)
-    //{
-    //    if (profileInputDto == null)
-    //    {
-    //        return BadRequest("ProfileInputDto가 null 입니다.");
-    //    }
-    //
-    //    await _service.ProfileService.UpdateProfile(userId, profileInputDto, trackChanges: true);
-    //
-    //    return NoContent(); // 204 No Content, when the update is successful but no data needs to be returned
-    //}
+    [HttpPatch("{userId:guid}")]
+    [Authorize(Roles = "NormalUser")]
+    public async Task<IActionResult> UpdateProfile(string userId, [FromBody] ProfileInputDto profileInputDto)
+    {
+        string UserIdToGetClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId != UserIdToGetClaim)
+            return BadRequest("요청자의 ID와 일치하지 않습니다.");
+        if (profileInputDto == null)
+            return BadRequest("ProfileInputDto가 null 입니다.");
+    
+        await _service.ProfileService.UpdateProfile(userId, profileInputDto, trackChanges: true);
+    
+        return NoContent(); // 204 No Content, when the update is successful but no data needs to be returned
+    }
 }
