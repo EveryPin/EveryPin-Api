@@ -46,19 +46,19 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    [HttpPatch("{userId:guid}")]
+    [HttpPatch("me")]
     [Authorize(Roles = "NormalUser")]
-    public async Task<IActionResult> UpdateProfile(string userId, [FromBody] ProfileInputDto profileInputDto)
+    public async Task<IActionResult> UpdateProfile([FromBody] ProfileUploadInputDto profileInputDto)
     {
-        //string UserIdToGetClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //
-        //if (userId != UserIdToGetClaim)
-        //    return BadRequest("요청자의 ID와 일치하지 않습니다.");
-        //if (profileInputDto == null)
-        //    return BadRequest("ProfileInputDto가 null 입니다.");
-        //
-        //await _service.ProfileService.UpdateProfile(userId, profileInputDto, trackChanges: true);
-    
+        string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+            return BadRequest("사용자 ID를 찾을 수 없습니다.");
+        if (profileInputDto == null)
+            return BadRequest("ProfileInputDto가 null 입니다.");
+
+        await _service.ProfileService.UpdateProfile(userId, profileInputDto, trackChanges: true);
+
         return NoContent(); // 204 No Content, when the update is successful but no data needs to be returned
     }
 }

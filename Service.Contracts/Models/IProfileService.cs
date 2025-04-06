@@ -14,5 +14,5 @@ public interface IProfileService
     Task<IEnumerable<ProfileDto>> GetAllProfile(bool trackChanges);
     Task<Profile> CreateProfile(Profile profile);
     Task<Profile> GetProfileByUserId(string userId, bool trackChanges);
-    Task<Profile> UpdateProfile(string userId, ProfileInputDto updateProfile);
+    Task<Profile> UpdateProfile(string userId, ProfileUploadInputDto updateProfile, bool trackChanges);
 }

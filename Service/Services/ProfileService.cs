@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Contracts.Repository;
 using Entites.Models;
+using ExternalLibraryService;
 using Microsoft.Extensions.Logging;
 using Service.Models;
 using Shared.DataTransferObject;
@@ -19,8 +20,9 @@ internal sealed class ProfileService : IProfileService
     private readonly ILogger<ProfileService> _logger;
     private readonly IRepositoryManager _repository;
     private readonly IMapper _mapper;
+    private readonly BlobHandlingService _blobHandlingService;
 
-    public ProfileService(ILogger<ProfileService> logger, IRepositoryManager repository, IMapper mapper)
+    public ProfileService(ILogger<ProfileService> logger, IRepositoryManager repository, IMapper mapper, BlobHandlingService blobHandlingService)
     {
         _logger = logger;
         _repository = repository;
@@ -68,21 +70,30 @@ internal sealed class ProfileService : IProfileService
         return profile;
     }
 
-    public async Task<Entites.Models.Profile> UpdateProfile(string userId, ProfileInputDto updateProfile)
+    public async Task<Entites.Models.Profile> UpdateProfile(string userId, ProfileUploadInputDto updateProfile, bool trackChanges)
     {
         Entites.Models.Profile originProfile = await GetProfileByUserId(userId, false);
 
         if (originProfile != null)
         {
+            if (updateProfile.PhotoFiles != null)
+            {
+                var uploadResult = await _blobHandlingService.UploadAsync(updateProfile.PhotoFiles);
+                if (uploadResult.Error)
+                {
+                    throw new Exception("Blob upload failed: " + uploadResult.Message);
+                }
+                originProfile.PhotoUrl = uploadResult.Blob.Uri;
+            }
+
             originProfile.ProfileTag = updateProfile.TagId;
             originProfile.ProfileName = updateProfile.Name;
             originProfile.SelfIntroduction = updateProfile.SelfIntroduction;
-            originProfile.PhotoUrl = updateProfile.PhotoUrl;
 
             _repository.Profile.UpdateProfile(originProfile);
             await _repository.SaveAsync();
         }
-    
+
         return originProfile;
     }
 }
