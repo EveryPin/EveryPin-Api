@@ -48,7 +48,7 @@ public class ProfileController : ControllerBase
 
     [HttpPatch("me")]
     [Authorize(Roles = "NormalUser")]
-    public async Task<IActionResult> UpdateProfile([FromBody] ProfileUploadInputDto profileInputDto)
+    public async Task<IActionResult> UpdateProfile(ProfileUploadInputDto profileInputDto)
     {
         string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 

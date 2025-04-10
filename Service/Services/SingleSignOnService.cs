@@ -57,12 +57,12 @@ public class SingleSignOnService : ISingleSignOnService
 
     public async Task<SingleSignOnUserInfo> GetUserInfo(string platformCode, string accessToken)
     {
-        if (!_platformStrategies.TryGetValue(platformCode.ToUpper(), out var strategy))
+        if (!_platformStrategies.TryGetValue(platformCode.ToUpper(), out var GetUserInfoFromServiceProvider))
         {
             throw new Exception($"지원되지 않는 플랫폼: {platformCode}");
         }
 
-        return await strategy(accessToken);
+        return await GetUserInfoFromServiceProvider(accessToken);
     }
 
     public async Task<string> GetKakaoAccessToken(string code)
@@ -111,7 +111,7 @@ public class SingleSignOnService : ISingleSignOnService
         return accessToken;
     }
 
-    public async Task<GoogleTokenDto> GetGoogleAccessToken(string code)
+    public async Task<string> GetGoogleAccessToken(string code)
     {
         string requestURL = "https://oauth2.googleapis.com/token";
         string authorizationCode = "authorization_code";
@@ -151,12 +151,14 @@ public class SingleSignOnService : ISingleSignOnService
 
 
                         string accessToken = root.GetProperty("access_token").GetString();
-                        int expires_in = root.GetProperty("expires_in").GetInt32();
-                        string refreshToken = root.GetProperty("refresh_token").GetString();
-                        string scope = root.GetProperty("scope").GetString();
-                        string id_token = root.GetProperty("id_token").GetString();
+                        //int expires_in = root.GetProperty("expires_in").GetInt32();
+                        //string refreshToken = root.GetProperty("refresh_token").GetString();
+                        //string scope = root.GetProperty("scope").GetString();
+                        //string id_token = root.GetProperty("id_token").GetString();
 
-                        return new GoogleTokenDto(accessToken, expires_in, refreshToken, scope, id_token);
+                        //return new GoogleTokenDto(accessToken, expires_in, refreshToken, scope, id_token);
+
+                        return accessToken;
                     }
                 }
                 else

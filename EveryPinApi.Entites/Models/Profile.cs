@@ -13,7 +13,7 @@ public class Profile
     [Key]
     public int ProfileId { get; set; }
     public required string UserId { get; set; }
-    public required string ProfileTag { get; set; }
+    public required string ProfileDisplayId { get; set; }
     public required string ProfileName { get; set; }
     public string? SelfIntroduction { get; set; }
     public string? PhotoUrl { get; set; }

@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Entites.Models;
 using ExternalLibraryService;
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -59,10 +60,10 @@ public class TestApiController : ControllerBase
         var profile = new Entites.Models.Profile()
         {
             UserId = userAccountInfo.Id,
+            ProfileDisplayId = registUserDto.Email.Split('@')[0],
             ProfileName = registUserDto.UserName,
             SelfIntroduction = null,
             PhotoUrl = null,
-            ProfileTag = registUserDto.UserName,
             User = userAccountInfo,
             CreatedDate = DateTime.Now
         };
@@ -109,6 +110,7 @@ public class TestApiController : ControllerBase
         {
             string fcmToken = ""; // 웹 테스트 용도라서 빈문자열로
             var user = await _service.UserService.RegistNewUser(userInfo, fcmToken);
+            await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);
@@ -120,10 +122,10 @@ public class TestApiController : ControllerBase
     public async Task<IActionResult> GoogleWebLogin(string code)
     {
         string platformCode = "google";
-        GoogleTokenDto googleAccessToken = await _service.SingleSignOnService.GetGoogleAccessToken(code);
+        string googleAccessToken = await _service.SingleSignOnService.GetGoogleAccessToken(code);
 
         // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, googleAccessToken.accessToken);
+        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, googleAccessToken);
         if (userInfo == null) throw new UnauthorizedAccessException("SSO 인증 실패");
 
         // 사용자 검증 및 회원가입
@@ -132,6 +134,7 @@ public class TestApiController : ControllerBase
         {
             string fcmToken = ""; // 웹 테스트 용도라서 빈문자열로
             var user = await _service.UserService.RegistNewUser(userInfo, fcmToken);
+            await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);

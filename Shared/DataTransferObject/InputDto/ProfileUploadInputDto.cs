@@ -9,7 +9,7 @@ namespace Shared.DataTransferObject.InputDto;
 
 public class ProfileUploadInputDto
 {
-    public string? TagId { get; set; }
+    public string? ProfileDisplayId { get; set; }
     public string? Name { get; set; }
     public string? SelfIntroduction { get; set; }
     public IFormFile? PhotoFiles { get; set; }

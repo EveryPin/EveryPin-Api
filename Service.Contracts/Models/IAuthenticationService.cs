@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Shared.DataTransferObject;
 using Shared.DataTransferObject.Auth;
+using Entites.Models;
 
 namespace Service.Contracts.Models;
 

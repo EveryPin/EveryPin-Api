@@ -2,6 +2,7 @@
 using Contracts.Repository;
 using Entites.Models;
 using ExternalLibraryService;
+using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Logging;
 using Service.Models;
 using Shared.DataTransferObject;
@@ -27,6 +28,7 @@ internal sealed class ProfileService : IProfileService
         _logger = logger;
         _repository = repository;
         _mapper = mapper;
+        _blobHandlingService = blobHandlingService;
     }
 
     public async Task<IEnumerable<ProfileDto>> GetAllProfile(bool trackChanges)
@@ -43,8 +45,8 @@ internal sealed class ProfileService : IProfileService
         {
             User = user,
             UserId = user.Id,
-            ProfileTag = user.UserName,
             ProfileName = user.UserName,
+            ProfileDisplayId = user.Email.Split('@')[0],
             CreatedDate = DateTime.Now
         };
 
@@ -86,7 +88,6 @@ internal sealed class ProfileService : IProfileService
                 originProfile.PhotoUrl = uploadResult.Blob.Uri;
             }
 
-            originProfile.ProfileTag = updateProfile.TagId;
             originProfile.ProfileName = updateProfile.Name;
             originProfile.SelfIntroduction = updateProfile.SelfIntroduction;
 

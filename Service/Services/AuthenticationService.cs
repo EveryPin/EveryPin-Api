@@ -43,7 +43,7 @@ internal sealed class AuthenticationService : IAuthenticationService
             await _userManager.AddToRolesAsync(user, registUserDto.Roles);
         return result;
     }
-    
+
     public async Task<bool> ValidateUser(string userEmail)
     {
         _user = await _userManager.FindByEmailAsync(userEmail);
