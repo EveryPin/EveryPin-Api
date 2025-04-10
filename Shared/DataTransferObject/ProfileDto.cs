@@ -10,7 +10,7 @@ public record ProfileDto
 (
     int Id,
     Guid UserId,
-    string? TagId,
+    string? ProfileDisplayId,
     string? Name,
     string? SelfIntroduction,
     string? PhotoUrl,

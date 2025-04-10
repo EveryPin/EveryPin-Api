@@ -45,19 +45,18 @@ internal sealed class UserService : IUserService
 
         var user = _mapper.Map<User>(newUser);
 
-        var profile = new Entites.Models.Profile()
+        user.Profile = new Entites.Models.Profile()
         {
             UserId = user.Id,
-            ProfileTag = user.UserName,
+            ProfileDisplayId = userInfo.UserEmail.Split('@')[0],
             ProfileName = user.UserName,
             CreatedDate = DateTime.Now,
             User = user
         };
-        user.Profile = profile;
 
-        var userCreateresult = await _userManager.CreateAsync(user, newUser.Password ?? "0");
+        var userCreateResult = await _userManager.CreateAsync(user, newUser.Password);
 
-        if (userCreateresult.Succeeded)
+        if (userCreateResult.Succeeded)
             await _userManager.AddToRolesAsync(user, newUser.Roles);
         else
             throw new Exception("회원가입 실패");

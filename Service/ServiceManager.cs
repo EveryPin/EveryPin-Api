@@ -34,7 +34,7 @@ public sealed class ServiceManager : IServiceManager
         _likeService = new Lazy<ILikeService>(() => new LikeService(loggerFactory.CreateLogger<LikeService>(), repositoryManager, mapper));
         _postPhotoService = new Lazy<IPostPhotoService>(() => new PostPhotoService(loggerFactory.CreateLogger<PostPhotoService>(), repositoryManager, mapper));
         _postService = new Lazy<IPostService>(() => new PostService(loggerFactory.CreateLogger<PostService>(), repositoryManager, mapper, blobHandlingService));
-        _profileService = new Lazy<IProfileService>(() => new ProfileService(loggerFactory.CreateLogger<ProfileService>(), repositoryManager, mapper));
+        _profileService = new Lazy<IProfileService>(() => new ProfileService(loggerFactory.CreateLogger<ProfileService>(), repositoryManager, mapper, blobHandlingService));
         _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(loggerFactory.CreateLogger<AuthenticationService>(), mapper, userManager, configuration));
         _kakaoService = new Lazy<ISingleSignOnService>(() => new SingleSignOnService(loggerFactory.CreateLogger<SingleSignOnService>(), configuration, repositoryManager));
         _userService = new Lazy<IUserService>(() => new UserService(loggerFactory.CreateLogger<UserService>(), repositoryManager, userManager, mapper));

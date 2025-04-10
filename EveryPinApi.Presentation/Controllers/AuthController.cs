@@ -42,6 +42,7 @@ public class AuthController : ControllerBase
         if (!isUserExist)
         {
             var user = await _service.UserService.RegistNewUser(userInfo, loginInputDto.fcmToken);
+            await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken(loginInputDto.fcmToken, populateExp: true);
