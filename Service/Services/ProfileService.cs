@@ -72,6 +72,14 @@ internal sealed class ProfileService : IProfileService
         return profile;
     }
 
+    public async Task<Entites.Models.Profile> GetProfileByDisplayId(string profileDisplayId, bool trackChanges)
+    {
+        var profile = await _repository.Profile.GetProfileByDisplayId(profileDisplayId, trackChanges);
+        //var profileDto = _mapper.Map<ProfileDto>(profile);
+
+        return profile;
+    }
+
     public async Task<Entites.Models.Profile> UpdateProfile(string userId, ProfileUploadInputDto updateProfile, bool trackChanges)
     {
         Entites.Models.Profile originProfile = await GetProfileByUserId(userId, false);
