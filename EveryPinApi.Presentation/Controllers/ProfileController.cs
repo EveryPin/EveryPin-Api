@@ -38,7 +38,7 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    [HttpGet("{userId:guid}", Name = "GetProfileByUserId")]
+    [HttpGet("user-id/{userId:guid}", Name = "GetProfileByUserId")]
     //[Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> GetProfileByUserId(string userId)
     {
@@ -46,7 +46,7 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    [HttpGet("GetProfileByDisplayId")]
+    [HttpGet("profile-display-id/{profileDisplayId}")]
     //[Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> GetProfileByDisplayId(string profileDisplayId)
     {
