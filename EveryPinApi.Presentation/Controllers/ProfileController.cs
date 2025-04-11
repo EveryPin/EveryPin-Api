@@ -46,7 +46,7 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    [HttpGet("{profileDisplayId:string}", Name = "GetProfileByDisplayId")]
+    [HttpGet("GetProfileByDisplayId")]
     //[Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> GetProfileByDisplayId(string profileDisplayId)
     {
