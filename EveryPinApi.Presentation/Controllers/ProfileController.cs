@@ -46,6 +46,14 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
+    [HttpGet("{profileDisplayId:string}", Name = "GetProfileByDisplayId")]
+    //[Authorize(Roles = "NormalUser")]
+    public async Task<IActionResult> GetProfileByDisplayId(string profileDisplayId)
+    {
+        var profile = await _service.ProfileService.GetProfileByDisplayId(profileDisplayId, trackChanges: false);
+        return Ok(profile);
+    }
+
     [HttpPatch("me")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> UpdateProfile(ProfileUploadInputDto profileInputDto)

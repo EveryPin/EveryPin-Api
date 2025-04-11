@@ -13,4 +13,5 @@ public interface IProfileRepository
     void CreateProfile(Profile profile);
     void UpdateProfile(Profile profile);
     Task<Profile> GetProfileByUserId(string userId, bool trackChanges);
+    Task<Profile> GetProfileByDisplayId(string profileDisplayId, bool trackChanges);
 }
