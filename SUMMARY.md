@@ -1,51 +1,8 @@
 # Table of contents
 
-* [EveryPin API 명세서](README.md)
+* [EveryPin API](README.md)
 
-## API 명세서 (초기 버전)
-
-* [개요](api/undefined.md)
-* [회원 관리 및 인증/인가](api/test/README.md)
-  * [🟢 로그인/회원가입](api/test/undefined.md)
-  * [🟢 액세스 토큰 Refresh](api/test/refresh.md)
-  * [❌ 로그아웃](api/test/undefined-1.md)
-  * [❌ 회원 탈퇴](api/test/undefined-2.md)
-* [게시글](api/undefined-1/README.md)
-  * [🧪 전체 게시글 조회](api/undefined-1/undefined.md)
-  * [🟢 범위 게시글 조회](api/undefined-1/undefined-1.md)
-  * [❌ 유저 게시글 조회](api/undefined-1/undefined-2.md)
-  * [🟢 게시글 상세 조회](api/undefined-1/undefined-3.md)
-  * [🟢 게시글 작성](api/undefined-1/undefined-4.md)
-  * [❌ 게시글 수정](api/undefined-1/undefined-5.md)
-  * [❌ 게시글 삭제](api/undefined-1/undefined-6.md)
-* [좋아요](api/undefined-2/README.md)
-  * [❌ 좋아요 추가](api/undefined-2/undefined.md)
-  * [❌ 좋아요 삭제](api/undefined-2/undefined-1.md)
-* [댓글](api/undefined-3/README.md)
-  * [🧪 전체 댓글 조회](api/undefined-3/undefined.md)
-  * [🟠 댓글 조회](api/undefined-3/undefined-1.md)
-  * [🟠 댓글 작성](api/undefined-3/undefined-2.md)
-  * [❌ 댓글 수정](api/undefined-3/undefined-3.md)
-  * [❌ 댓글 삭제](api/undefined-3/undefined-4.md)
-* [프로필](api/undefined-4/README.md)
-  * [❌ 유저 프로필 조회](api/undefined-4/undefined.md)
-  * [❌ 유저 프로필 수정](api/undefined-4/undefined-1.md)
-  * [❌ 유저 프로필 팔로우 추가](api/undefined-4/undefined-2.md)
-  * [❌ 유저 프로필 팔로우 삭제](api/undefined-4/undefined-3.md)
-* [채팅](api/undefined-5.md)
-* [알림](api/undefined-6.md)
-* [🧪 테스트 API](api/api/README.md)
-  * [회원가입 테스트](api/api/undefined.md)
-  * [🟢 로그인 테스트](api/api/undefined-1.md)
-  * [OAuth 플랫폼 테스트](api/api/oauth.md)
-  * [Azure Blob Storage 테스트](api/api/azure-blob-storage/README.md)
-    * [Blob 전체 조회](api/api/azure-blob-storage/blob.md)
-    * [Blob 업로드](api/api/azure-blob-storage/blob-1.md)
-    * [Blob 다운로드](api/api/azure-blob-storage/blob-2.md)
-    * [Blob 삭제](api/api/azure-blob-storage/blob-3.md)
-  * [템플릿](api/api/undefined-2.md)
-
-## API 명세서 (리펙토링 버전) <a href="#api-2" id="api-2"></a>
+## API 명세서 <a href="#api-2" id="api-2"></a>
 
 * [개요](api-2/undefined.md)
 * [회원 관리 및 인증/인가](api-2/test/README.md)
@@ -78,3 +35,8 @@
   * [프로필 조회 (본인)](api-2/undefined-4/undefined.md)
   * [프로필 조회 (ID)](api-2/undefined-4/id.md)
 * [알림](api-2/undefined-5.md)
+
+## DB 설계
+
+* [개요](db/undefined.md)
+* [Page 1](db/page-1.md)
