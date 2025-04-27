@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace Shared.Dtos.Common;
 public class TokenDto
 {
-    public string? AccessToken;
-    public string? RefreshToken;
+    public string? AccessToken { get; set; }
+    public string? RefreshToken { get; set; }
 
     public TokenDto(string accessToken, string refreshToken)
     {

@@ -9,8 +9,7 @@ public class LikeResponse
     public string UserId { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    // Entity에서 변환 메서드
-    public LikeResponse FromEntity(Entites.Models.Like entity)
+    public LikeResponse? FromEntity(Entites.Models.Like entity)
     {
         if (entity == null) return null;
 

@@ -30,7 +30,6 @@ public class RegisterUserRequest
     }
 }
 
-// User ?”í‹°?°ì˜ ?°ì´?°ë§Œ ?´ëŠ” DTO
 public class UserData
 {
     public string Id { get; set; } = string.Empty;

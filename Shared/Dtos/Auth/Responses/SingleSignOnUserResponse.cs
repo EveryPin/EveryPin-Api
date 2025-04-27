@@ -7,9 +7,9 @@ public class SingleSignOnUserResponse
 {
     public string? UserNickName { get; set; }
     public string? UserEmail { get; set; }
-    public string PlatformCode { get; set; }
+    public string? PlatformCode { get; set; }
 
-    public SingleSignOnUserResponse FromSingleSignOnUserInfo(SingleSignOnUserInfo info)
+    public SingleSignOnUserResponse? FromSingleSignOnUserInfo(SingleSignOnUserInfo info)
     {
         if (info == null) return null;
 
@@ -17,7 +17,7 @@ public class SingleSignOnUserResponse
         {
             UserNickName = info.UserNickName,
             UserEmail = info.UserEmail,
-            PlatformCode = info.PlatformCode.ToString()
+            PlatformCode = info.PlatformCode != null ? info.PlatformCode.ToString() : null
         };
     }
 }

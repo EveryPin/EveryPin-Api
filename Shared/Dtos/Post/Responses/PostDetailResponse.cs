@@ -18,7 +18,7 @@ public class PostDetailResponse
     public DateTime? UpdateDate { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    public PostDetailResponse FromEntity(
+    public PostDetailResponse? FromEntity(
         Entites.Models.Post entity, 
         int likeCount, 
         Entites.Models.Profile? writerProfile)

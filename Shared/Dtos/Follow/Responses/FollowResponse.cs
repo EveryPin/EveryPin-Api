@@ -13,8 +13,7 @@ public class FollowResponse
     public ProfileResponse? FollowerProfile { get; set; }
     public ProfileResponse? FollowingProfile { get; set; }
 
-    // Entity에서 변환 메서드
-    public FollowResponse FromEntity(
+    public FollowResponse? FromEntity(
         Entites.Models.Follow entity, 
         Entites.Models.Profile? followerProfile, 
         Entites.Models.Profile? followingProfile)

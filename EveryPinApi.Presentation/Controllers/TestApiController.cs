@@ -46,63 +46,12 @@ public class TestApiController : ControllerBase
     }
 
     #region 로그인 테스트
-    //[HttpPost("auth/regist")]
-    ////[ServiceFilter(typeof(ValidationFilterAttribute))]        
-    //public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerUserRequest)
-    //{
-    //    var result = await _service.AuthenticationService.RegisterUser(new User
-    //    {
-    //        Name = registerUserRequest.Name,
-    //        UserName = registerUserRequest.UserName,
-    //        Password = registerUserRequest.Password,
-    //        Email = registerUserRequest.Email,
-    //        PhoneNumber = registerUserRequest.PhoneNumber,
-    //        PlatformCode = registerUserRequest.PlatformCode,
-    //        FcmToken = registerUserRequest.FcmToken,
-    //        Roles = registerUserRequest.Roles
-    //    });
-    //
-    //    if (!result.Succeeded)
-    //    {
-    //        foreach (var error in result.Errors)
-    //        {
-    //            ModelState.TryAddModelError(error.Code, error.Description);
-    //        }
-    //        return BadRequest(ModelState);
-    //    }
-    //
-    //    var userAccountInfo = await _service.UserService.GetUserByEmail(registerUserRequest.Email, false);
-    //
-    //    var profile = new Entites.Models.Profile()
-    //    {
-    //        UserId = userAccountInfo.Id,
-    //        ProfileDisplayId = registerUserRequest.Email.Split('@')[0],
-    //        ProfileName = registerUserRequest.UserName,
-    //        SelfIntroduction = null,
-    //        PhotoUrl = null,
-    //        User = userAccountInfo,
-    //        CreatedDate = DateTime.Now
-    //    };
-    //
-    //    var createdProfile = await _service.ProfileService.CreateProfile(profile);
-    //
-    //    if (createdProfile != null)
-    //    {
-    //        return StatusCode(201);
-    //    }
-    //    else
-    //    {
-    //        return BadRequest("createdProfile가 null입니다.");
-    //    }
-    //}
-
     [HttpPost("auth/login")]
-    [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> Authenticate([FromBody] LoginRequest loginRequest)
+    public async Task<IActionResult> Authenticate([FromBody] string userEmail)
     {
-        var userInfo = await _service.SingleSignOnService.GetUserInfo(loginRequest.PlatformCode, loginRequest.AccessToken);
+        var userInfo = await _service.UserService.GetUserByEmail(userEmail, false);
 
-        if (!await _service.AuthenticationService.ValidateUser(userInfo.UserEmail))
+        if (!await _service.AuthenticationService.ValidateUser(userEmail))
             return Unauthorized();
 
         var tokenDto = await _service.AuthenticationService.CreateToken(populateExp: true);

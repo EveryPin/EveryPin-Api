@@ -10,7 +10,7 @@ public class PostPhotoResponse
     public DateTime? UpdateDate { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    public PostPhotoResponse FromEntity(Entites.Models.PostPhoto entity)
+    public PostPhotoResponse? FromEntity(Entites.Models.PostPhoto entity)
     {
         if (entity == null) return null;
 

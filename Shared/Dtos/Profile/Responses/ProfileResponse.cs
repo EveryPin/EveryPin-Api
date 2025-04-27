@@ -11,7 +11,7 @@ public class ProfileResponse
     public DateTime? UpdatedDate { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    public ProfileResponse FromEntity(Entites.Models.Profile entity)
+    public ProfileResponse? FromEntity(Entites.Models.Profile entity)
     {
         if (entity == null) return null;
 
