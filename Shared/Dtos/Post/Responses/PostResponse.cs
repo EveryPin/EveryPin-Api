@@ -20,30 +20,4 @@ public class PostResponse
     public int LikeCount { get; set; }
     public bool IsLiked { get; set; }
     public List<PostPhotoResponse>? Photos { get; set; }
-
-    public PostResponse FromPostDto(Post post)
-    {
-        if (post == null) return null;
-
-        PostId = post.PostId;
-        UserId = post.UserId ?? string.Empty;
-        UserName = post.UserName;
-        PostContent = post.PostContent;
-        Address = post.Address;
-        X = post.X;
-        Y = post.Y;
-        CreatedDate = post.CreatedDate ?? DateTime.Now;
-        UpdateDate = post.UpdateDate;
-        CommentCount = post.CommentCount;
-        LikeCount = post.LikeCount;
-        IsLiked = post.IsLiked;
-        Photos = post.Photos?.Select(p => new PostPhotoResponse
-        {
-            PostPhotoId = p.PhotoId,
-            PostId = p.PostId,
-            PhotoUrl = p.PhotoUrl
-        }).ToList();
-
-        return this;
-    }
 }

@@ -18,7 +18,6 @@ public class PostDetailResponse
     public DateTime? UpdateDate { get; set; }
     public DateTime CreatedDate { get; set; }
 
-    // Entity에서 변환 메서드
     public PostDetailResponse FromEntity(
         Entites.Models.Post entity, 
         int likeCount, 
@@ -38,35 +37,6 @@ public class PostDetailResponse
             : null;
         UpdateDate = entity.UpdateDate;
         CreatedDate = entity.CreatedDate;
-
-        return this;
-    }
-
-    // 기존 DTO에서 변환
-    public PostDetailResponse FromPostPostPhotoDto(
-        Shared.DataTransferObject.OutputDto.PostPostPhotoDto dto)
-    {
-        if (dto == null) return null;
-
-        var postPhotos = dto.PostPhotos?.Select(p => 
-            new PostPhotoResponse
-            {
-                PostPhotoId = p.PostPhotoId,
-                PostId = dto.PostId, // 사진에는 PostId가 없으므로 포스트 ID를 사용
-                PhotoUrl = p.photoUrl, // 소문자 p로 시작하는 속성명 사용
-                CreatedDate = dto.CreatedDate ?? DateTime.Now
-            }).ToList();
-
-        PostId = dto.PostId;
-        UserId = dto.UserId;
-        PostContent = dto.PostContent;
-        X = dto.x; // 소문자 x 사용
-        Y = dto.y; // 소문자 y 사용
-        LikeCount = dto.LikeCount;
-        Writer = dto.Writer != null ? new ProfileResponse().FromEntity(dto.Writer) : null;
-        PostPhotos = postPhotos;
-        UpdateDate = dto.UpdateDate;
-        CreatedDate = dto.CreatedDate ?? DateTime.Now;
 
         return this;
     }
