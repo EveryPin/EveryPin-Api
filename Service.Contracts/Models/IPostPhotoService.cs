@@ -1,4 +1,5 @@
-﻿using Shared.DataTransferObject;
+﻿using Shared.Dtos.Post.Responses;
+using Shared.Dtos.Post.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Service.Contracts.Models;
 
 public interface IPostPhotoService
 {
-    Task<IEnumerable<PostPhotoDto>> GetAllPostPhoto(bool trackChanges);
-    Task<IEnumerable<PostPhotoDto>> GetPostPhotoToPostId(int postId, bool trackChanges);
-    Task<PostPhotoDto> CreatePostPhoto(CreatePostPhotoDto postphoto);
+    Task<IEnumerable<PostPhotoResponse>> GetAllPostPhoto(bool trackChanges);
+    Task<IEnumerable<PostPhotoResponse>> GetPostPhotoToPostId(int postId, bool trackChanges);
+    Task<PostPhotoResponse> CreatePostPhoto(PostPhotoResponse postphoto);
 }

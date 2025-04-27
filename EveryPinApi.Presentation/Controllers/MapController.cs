@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.Dtos.Map.Requests;
+using Shared.Dtos.Post.Responses;
 
 namespace EveryPinApi.Presentation.Controllers;
 
@@ -23,11 +20,10 @@ public class MapController : ControllerBase
     }
 
     [HttpGet("pin")]
-    public async Task<IActionResult> GetSearchPost([FromQuery] double x,
-                                                   [FromQuery] double y, 
-                                                   [FromQuery] double range)
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostDetailResponse>))]
+    public async Task<IActionResult> GetSearchPost([FromQuery] SearchPostRequest searchRequest)
     {
-        var posts = await _service.PostService.GetSearchPost(x, y, range, trackChanges: false);
+        var posts = await _service.PostService.GetSearchPost(searchRequest.x, searchRequest.y, searchRequest.range, trackChanges: false);
         return Ok(posts);
     }
 

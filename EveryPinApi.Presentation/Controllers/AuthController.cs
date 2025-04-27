@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.Auth;
-using Shared.DataTransferObject.InputDto.Auth;
+using Shared.Dtos.Auth.Requests;
+using Shared.Dtos.Auth.Responses;
+using Shared.Dtos.Common;
 using System.Security.Claims;
 
 namespace EveryPinApi.Presentation.Controllers;
@@ -31,29 +31,34 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> Login(LoginInputDto loginInputDto)
+    public async Task<IActionResult> Login(LoginRequest loginRequest)
     {
         // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(loginInputDto.platformCode, loginInputDto.accessToken);
-        if (userInfo == null) throw new UnauthorizedAccessException("SSO 인증 실패");
+        var userInfo = await _service.SingleSignOnService.GetUserInfo(loginRequest.PlatformCode, loginRequest.AccessToken);
+        if (userInfo == null || userInfo.UserEmail == null) throw new UnauthorizedAccessException("SSO 인증 실패");
 
         // 사용자 검증 및 회원가입
         bool isUserExist = await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         if (!isUserExist)
         {
-            var user = await _service.UserService.RegistNewUser(userInfo, loginInputDto.fcmToken);
+            var user = await _service.UserService.RegistNewUser(userInfo, loginRequest.FcmToken);
             await _service.AuthenticationService.ValidateUser(userInfo.UserEmail);
         }
 
-        var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken(loginInputDto.fcmToken, populateExp: true);
+        var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken(loginRequest.FcmToken, populateExp: true);
+
         return Ok(tokenDto);
     }
 
     [HttpPost("refresh")]
     [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> Refresh([FromBody] TokenDto tokenDto)
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest refreshRequest)
     {
+        // 필요한 경우 RefreshTokenRequest를 TokenDto로 변환
+        var tokenDto = new TokenDto(refreshRequest.AccessToken, refreshRequest.RefreshToken);
+        
         var tokenDtoToReturn = await _service.AuthenticationService.RefreshToken(tokenDto);
+
         return Ok(tokenDtoToReturn);
     }
 

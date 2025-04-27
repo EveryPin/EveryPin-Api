@@ -14,6 +14,7 @@ public interface IRepositoryManager
     IPostPhotoRepository PostPhoto { get; }
     IPostRepository Post { get; }
     IProfileRepository Profile { get; }
-    IUserRepository User { get; }   
+    IUserRepository User { get; }
+    ICodeOAuthPlatformRepository CodeOAuthPlatform { get; }
     Task SaveAsync();
 }

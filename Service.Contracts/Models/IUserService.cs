@@ -1,5 +1,5 @@
 ﻿using Entites.Models;
-using Shared.DataTransferObject.Auth;
+using Shared.Dtos.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,16 +1,15 @@
-﻿using AutoMapper;
-using Contracts.Repository;
+﻿using Contracts.Repository;
 using Entites.Exceptions;
 using Entites.Models;
 using Microsoft.Extensions.Logging;
 using Service.Models;
-using Shared.DataTransferObject;
+using Shared.Dtos.Like.Responses;
+using Shared.Dtos.Like.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Service.Contracts.Models;
 
@@ -18,24 +17,33 @@ internal sealed class LikeService : ILikeService
 {
     private readonly ILogger<LikeService> _logger;
     private readonly IRepositoryManager _repository;
-    private readonly IMapper _mapper;
 
-    public LikeService(ILogger<LikeService> logger, IRepositoryManager repository, IMapper mapper)
+    public LikeService(ILogger<LikeService> logger, IRepositoryManager repository)
     {
         _logger = logger;
         _repository = repository;
-        _mapper = mapper;
     }
 
-    public async Task<IEnumerable<LikeDto>> GetAllLike(bool trackChanges)
+    public async Task<IEnumerable<LikeResponse>> GetAllLike(bool trackChanges)
     {
         var likes = await _repository.Like.GetAllLike(trackChanges);
-        var likesDto = _mapper.Map<IEnumerable<LikeDto>>(likes);
+        var likeResponses = new List<LikeResponse>();
+        
+        foreach (var like in likes)
+        {
+            likeResponses.Add(new LikeResponse
+            {
+                LikeId = like.LikeId,
+                PostId = like.PostId,
+                UserId = like.UserId,
+                CreatedDate = like.CreatedDate
+            });
+        }
 
-        return likesDto;
+        return likeResponses;
     }
 
-    public async Task<IEnumerable<LikeDto>> GetLikeToPostId(int postId, bool trackChanges)
+    public async Task<IEnumerable<LikeResponse>> GetLikeToPostId(int postId, bool trackChanges)
     {
         var post = await _repository.Post.GetPostById(postId, trackChanges);
 
@@ -43,9 +51,20 @@ internal sealed class LikeService : ILikeService
             throw new PostNotFoundException(postId);
 
         var likes = await _repository.Like.GetLikeByPostId(postId, trackChanges);
-        var likesDto = _mapper.Map<IEnumerable<LikeDto>>(likes);
+        var likeResponses = new List<LikeResponse>();
+        
+        foreach (var like in likes)
+        {
+            likeResponses.Add(new LikeResponse
+            {
+                LikeId = like.LikeId,
+                PostId = like.PostId,
+                UserId = like.UserId,
+                CreatedDate = like.CreatedDate
+            });
+        }
 
-        return likesDto;
+        return likeResponses;
     }
 
     public async Task<int> GetLikeCountToPostId(int postId, bool trackChanges)
@@ -60,15 +79,26 @@ internal sealed class LikeService : ILikeService
         return likeCount;
     }
 
-    public async Task<LikeDto> CreateLike(CreateLikeDto like)
+    public async Task<LikeResponse> CreateLike(string userId, CreateLikeRequest like)
     {
-        var likeEntity = _mapper.Map<Like>(like);
+        var likeEntity = new Like
+        {
+            PostId = like.PostId,
+            UserId = userId,
+            CreatedDate = DateTime.Now
+        };
 
         _repository.Like.CreateLike(likeEntity);
         await _repository.SaveAsync();
 
-        var likeToReturn = _mapper.Map<LikeDto>(likeEntity);
+        var likeResponse = new LikeResponse
+        {
+            LikeId = likeEntity.LikeId,
+            PostId = likeEntity.PostId,
+            UserId = likeEntity.UserId,
+            CreatedDate = likeEntity.CreatedDate
+        };
 
-        return likeToReturn;
+        return likeResponse;
     }
 }

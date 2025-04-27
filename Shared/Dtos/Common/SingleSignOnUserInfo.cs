@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.DataTransferObject.Auth;
+namespace Shared.Dtos.Common;
 
 public class SingleSignOnUserInfo
 {

@@ -2,7 +2,7 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
-using Shared.DataTransferObject.Blob;
+using Shared.Dtos.Common.Blob;
 
 namespace ExternalLibraryService;
 
@@ -70,9 +70,9 @@ public class BlobHandlingService
     /// </summary>
     /// <param name="blob"></param>
     /// <returns></returns>
-    public async Task<BlobResponseDto> UploadAsync(IFormFile blob)
+    public async Task<BlobResultDto> UploadAsync(IFormFile blob)
     {
-        BlobResponseDto response = new BlobResponseDto();
+        BlobResultDto response = new BlobResultDto();
         BlobClient client = _blobContainer.GetBlobClient(blob.FileName);
         string contentType = "image/jpeg";
 
@@ -105,10 +105,10 @@ public class BlobHandlingService
         return response;
     }
 
-    public async Task<BlobResponseDto> UploadPostPhotoAsync(int postPhotoId, IFormFile blob)
+    public async Task<BlobResultDto> UploadPostPhotoAsync(int postPhotoId, IFormFile blob)
     {
         string blobFileName = $"PostPhoto_{postPhotoId}";
-        BlobResponseDto response = new BlobResponseDto();
+        BlobResultDto response = new BlobResultDto();
         BlobClient client = _blobContainer.GetBlobClient(blobFileName);
         string contentType = "image/jpeg";
 
@@ -181,11 +181,11 @@ public class BlobHandlingService
     /// </summary>
     /// <param name="blobFileName"></param>
     /// <returns></returns>
-    public async Task<BlobResponseDto> DeleteAsync(string blobFileName)
+    public async Task<BlobResultDto> DeleteAsync(string blobFileName)
     {
         BlobClient file = _blobContainer.GetBlobClient(blobFileName);
         await file.DeleteAsync();
 
-        return new BlobResponseDto { Error = false, Message = $"{blobFileName} 삭제 완료" };
+        return new BlobResultDto { Error = false, Message = $"{blobFileName} 삭제 완료" };
     }
 }

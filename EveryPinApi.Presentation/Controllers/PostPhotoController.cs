@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using Shared.DataTransferObject;
+using Shared.Dtos.Post.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,34 +30,70 @@ public class PostPhotoController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "NormalUser")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoResponse>))]
     public async Task<IActionResult> GetAllPostPhoto()
     {
         var postPhotos = await _service.PostPhotoService.GetAllPostPhoto(trackChanges: false);
-        return Ok(postPhotos);
+        
+        // 기존 DTO를 새 DTO로 변환
+        var postPhotoResponses = postPhotos.Select(p => new PostPhotoResponse
+        {
+            PostPhotoId = p.PostPhotoId,
+            PostId = p.PostId, // 속성명 수정
+            PhotoUrl = p.photoUrl, // 소문자 p로 시작하는 속성명 사용
+            UpdateDate = DateTime.Now, // 기존 DTO에 없는 속성, 임시값 사용
+            CreatedDate = DateTime.Now // 기존 DTO에 없는 속성, 임시값 사용
+        }).ToList();
+        
+        return Ok(postPhotoResponses);
     }
 
     [HttpGet("{postId:int}", Name = "GetPostPhotoById")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoResponse>))]
     public async Task<IActionResult> GetPostPhotoToPostId(int postId)
     {
         var postPhotos = await _service.PostPhotoService.GetPostPhotoToPostId(postId, trackChanges: false);
 
-        return Ok(postPhotos);
+        // 기존 DTO를 새 DTO로 변환
+        var postPhotoResponses = postPhotos.Select(p => new PostPhotoResponse
+        {
+            PostPhotoId = p.PostPhotoId,
+            PostId = p.PostId, // 속성명 수정
+            PhotoUrl = p.photoUrl, // 소문자 p로 시작하는 속성명 사용
+            UpdateDate = DateTime.Now, // 기존 DTO에 없는 속성, 임시값 사용
+            CreatedDate = DateTime.Now // 기존 DTO에 없는 속성, 임시값 사용
+        }).ToList();
+
+        return Ok(postPhotoResponses);
     }
 
     [HttpPost]
     [Authorize(Roles = "NormalUser")]
-    public async Task<IActionResult> CreatePostPhoto([FromBody] CreatePostPhotoDto postPhotoDto)
+    public async Task<IActionResult> CreatePostPhoto([FromBody] PostPhotoResponse postPhotoRequest)
     {
-        if (postPhotoDto is null)
+        if (postPhotoRequest is null)
             return BadRequest("게시글 사진 데이터가 빈 값입니다.");
 
         string UserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        // 새 DTO에서 기존 서비스 계층 DTO로 변환
+        var createPostPhotoDto = new CreatePostPhotoDto(
+            postPhotoRequest.PostId,
+            postPhotoRequest.PhotoUrl
+        );
 
-        var createPostPhoto = await _service.PostPhotoService.CreatePostPhoto(postPhotoDto);
+        var createPostPhoto = await _service.PostPhotoService.CreatePostPhoto(createPostPhotoDto);
 
-        return CreatedAtRoute("GetPostPhotoById", new { postId = createPostPhoto.PostPhotoId }, createPostPhoto);
+        // 기존 DTO를 새 DTO로 변환
+        var postPhotoResponse = new PostPhotoResponse
+        {
+            PostPhotoId = createPostPhoto.PostPhotoId,
+            PostId = createPostPhoto.PostId, // 속성명 수정
+            PhotoUrl = createPostPhoto.photoUrl, // 소문자 p로 시작하는 속성명 사용
+            UpdateDate = DateTime.Now, // 기존 DTO에 없는 속성, 임시값 사용
+            CreatedDate = DateTime.Now // 기존 DTO에 없는 속성, 임시값 사용
+        };
+
+        return CreatedAtRoute("GetPostPhotoById", new { postId = postPhotoResponse.PostId }, postPhotoResponse);
     }
 }

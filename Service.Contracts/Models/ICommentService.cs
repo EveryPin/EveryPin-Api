@@ -1,4 +1,5 @@
-﻿using Shared.DataTransferObject;
+﻿using Shared.Dtos.Comment.Responses;
+using Shared.Dtos.Comment.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Service.Contracts.Models;
 
 public interface ICommentService
 {
-    Task<IEnumerable<CommentDto>> GetAllComment(bool trackChanges);
-    Task<IEnumerable<CommentDto>> GetCommentToPostId(int postId, bool trackChanges);
-    Task<CommentDto> CreateComment(CreateCommentDto comment);
+    Task<IEnumerable<CommentResponse>> GetAllComment(bool trackChanges);
+    Task<IEnumerable<CommentResponse>> GetCommentToPostId(int postId, bool trackChanges);
+    Task<CommentResponse> CreateComment(string userId, CreateCommentRequest comment);
 }

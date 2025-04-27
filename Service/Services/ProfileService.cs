@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using Contracts.Repository;
+﻿using Contracts.Repository;
 using Entites.Models;
 using ExternalLibraryService;
 using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Logging;
 using Service.Models;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.InputDto;
+using Shared.Dtos.Profile.Responses;
+using Shared.Dtos.Profile.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,26 +19,30 @@ internal sealed class ProfileService : IProfileService
 {
     private readonly ILogger<ProfileService> _logger;
     private readonly IRepositoryManager _repository;
-    private readonly IMapper _mapper;
     private readonly BlobHandlingService _blobHandlingService;
 
-    public ProfileService(ILogger<ProfileService> logger, IRepositoryManager repository, IMapper mapper, BlobHandlingService blobHandlingService)
+    public ProfileService(ILogger<ProfileService> logger, IRepositoryManager repository, BlobHandlingService blobHandlingService)
     {
         _logger = logger;
         _repository = repository;
-        _mapper = mapper;
         _blobHandlingService = blobHandlingService;
     }
 
-    public async Task<IEnumerable<ProfileDto>> GetAllProfile(bool trackChanges)
+    public async Task<IEnumerable<ProfileResponse>> GetAllProfile(bool trackChanges)
     {
         var profiles = await _repository.Profile.GetAllProfile(trackChanges);
-        var profilesDto = _mapper.Map<IEnumerable<ProfileDto>>(profiles);
+        var profileResponses = new List<ProfileResponse>();
+        
+        foreach (var profile in profiles)
+        {
+            var profileResponse = new ProfileResponse();
+            profileResponses.Add(profileResponse.FromEntity(profile));
+        }
 
-        return profilesDto;
+        return profileResponses;
     }
 
-    public async Task<Entites.Models.Profile> RegistNewProfile(User user)
+    public async Task<ProfileResponse> RegistNewProfile(User user)
     {
         var newProfile = new Entites.Models.Profile
         {
@@ -50,10 +53,11 @@ internal sealed class ProfileService : IProfileService
             CreatedDate = DateTime.Now
         };
 
-        return await CreateProfile(newProfile);
+        var createdProfile = await CreateProfile(newProfile);
+        return createdProfile;
     }
 
-    public async Task<Entites.Models.Profile> CreateProfile(Entites.Models.Profile profile)
+    public async Task<ProfileResponse> CreateProfile(Entites.Models.Profile profile)
     {
         if (profile != null)
         {
@@ -61,34 +65,33 @@ internal sealed class ProfileService : IProfileService
             await _repository.SaveAsync();
         }
 
-        return profile;
+        var profileResponse = new ProfileResponse();
+        return profileResponse.FromEntity(profile);
     }
 
-    public async Task<Entites.Models.Profile> GetProfileByUserId(string userId, bool trackChanges)
+    public async Task<ProfileResponse> GetProfileByUserId(string userId, bool trackChanges)
     {
         var profile = await _repository.Profile.GetProfileByUserId(userId, trackChanges);
-        //var profileDto = _mapper.Map<ProfileDto>(profile);
-
-        return profile;
+        var profileResponse = new ProfileResponse();
+        return profileResponse.FromEntity(profile);
     }
 
-    public async Task<Entites.Models.Profile> GetProfileByDisplayId(string profileDisplayId, bool trackChanges)
+    public async Task<ProfileResponse> GetProfileByDisplayId(string profileDisplayId, bool trackChanges)
     {
         var profile = await _repository.Profile.GetProfileByDisplayId(profileDisplayId, trackChanges);
-        //var profileDto = _mapper.Map<ProfileDto>(profile);
-
-        return profile;
+        var profileResponse = new ProfileResponse();
+        return profileResponse.FromEntity(profile);
     }
 
-    public async Task<Entites.Models.Profile> UpdateProfile(string userId, ProfileUploadInputDto updateProfile, bool trackChanges)
+    public async Task<ProfileResponse> UpdateProfile(string userId, UpdateProfileRequest updateProfile, bool trackChanges)
     {
-        Entites.Models.Profile originProfile = await GetProfileByUserId(userId, false);
+        Entites.Models.Profile originProfile = await _repository.Profile.GetProfileByUserId(userId, false);
 
         if (originProfile != null)
         {
-            if (updateProfile.PhotoFiles != null)
+            if (updateProfile.PhotoFile != null)
             {
-                var uploadResult = await _blobHandlingService.UploadAsync(updateProfile.PhotoFiles);
+                var uploadResult = await _blobHandlingService.UploadAsync(updateProfile.PhotoFile);
                 if (uploadResult.Error)
                 {
                     throw new Exception("Blob upload failed: " + uploadResult.Message);
@@ -103,6 +106,7 @@ internal sealed class ProfileService : IProfileService
             await _repository.SaveAsync();
         }
 
-        return originProfile;
+        var profileResponse = new ProfileResponse();
+        return profileResponse.FromEntity(originProfile);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Contracts.Repository.Models;
 using Entites.Models;
 using Microsoft.EntityFrameworkCore;
-using Shared.DataTransferObject.InputDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;

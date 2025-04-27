@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Contracts.Repository;
+﻿using Contracts.Repository;
 using Entites.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -28,16 +27,16 @@ public sealed class ServiceManager : IServiceManager
     private readonly Lazy<ISingleSignOnService> _kakaoService;
     private readonly Lazy<IUserService> _userService;
 
-    public ServiceManager(IRepositoryManager repositoryManager, IMapper mapper, UserManager<User> userManager, IConfiguration configuration, ILoggerFactory loggerFactory, BlobHandlingService blobHandlingService)
+    public ServiceManager(IRepositoryManager repositoryManager, UserManager<User> userManager, IConfiguration configuration, ILoggerFactory loggerFactory, BlobHandlingService blobHandlingService)
     {
-        _commentService = new Lazy<ICommentService>(() => new CommentService(loggerFactory.CreateLogger<CommentService>(), repositoryManager, mapper));
-        _likeService = new Lazy<ILikeService>(() => new LikeService(loggerFactory.CreateLogger<LikeService>(), repositoryManager, mapper));
-        _postPhotoService = new Lazy<IPostPhotoService>(() => new PostPhotoService(loggerFactory.CreateLogger<PostPhotoService>(), repositoryManager, mapper));
-        _postService = new Lazy<IPostService>(() => new PostService(loggerFactory.CreateLogger<PostService>(), repositoryManager, mapper, blobHandlingService));
-        _profileService = new Lazy<IProfileService>(() => new ProfileService(loggerFactory.CreateLogger<ProfileService>(), repositoryManager, mapper, blobHandlingService));
-        _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(loggerFactory.CreateLogger<AuthenticationService>(), mapper, userManager, configuration));
+        _commentService = new Lazy<ICommentService>(() => new CommentService(loggerFactory.CreateLogger<CommentService>(), repositoryManager));
+        _likeService = new Lazy<ILikeService>(() => new LikeService(loggerFactory.CreateLogger<LikeService>(), repositoryManager));
+        _postPhotoService = new Lazy<IPostPhotoService>(() => new PostPhotoService(loggerFactory.CreateLogger<PostPhotoService>(), repositoryManager));
+        _postService = new Lazy<IPostService>(() => new PostService(loggerFactory.CreateLogger<PostService>(), repositoryManager, blobHandlingService));
+        _profileService = new Lazy<IProfileService>(() => new ProfileService(loggerFactory.CreateLogger<ProfileService>(), repositoryManager, blobHandlingService));
+        _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(loggerFactory.CreateLogger<AuthenticationService>(), userManager, configuration));
         _kakaoService = new Lazy<ISingleSignOnService>(() => new SingleSignOnService(loggerFactory.CreateLogger<SingleSignOnService>(), configuration, repositoryManager));
-        _userService = new Lazy<IUserService>(() => new UserService(loggerFactory.CreateLogger<UserService>(), repositoryManager, userManager, mapper));
+        _userService = new Lazy<IUserService>(() => new UserService(loggerFactory.CreateLogger<UserService>(), repositoryManager, userManager));
     }
 
     public ICommentService CommentService => _commentService.Value;

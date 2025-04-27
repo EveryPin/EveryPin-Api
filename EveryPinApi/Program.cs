@@ -10,13 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
     // Add services to the container.
     builder.Services.AddSingleton(builder.Environment);
     builder.Services.ConfigureCors();       // CORS
-    builder.Services.ConfigureRepositoryManager();      // RepositoryManager Ãß°¡
-    builder.Services.ConfigureServiceManager();         // ServiceManager Ãß°¡
+    builder.Services.ConfigureRepositoryManager();      // RepositoryManager ï¿½ß°ï¿½
+    builder.Services.ConfigureServiceManager();         // ServiceManager ï¿½ß°ï¿½
     builder.Services.ConfigureSqlContext(builder.Configuration);
-    builder.Services.ConfigureBlobStorage(builder.Configuration);   // Blob Storage ¼­ºñ½º µî·Ï
-    builder.Services.ConfigureFirebaseSDK(builder.Configuration);   // Firebase Admin SDK ¼­ºñ½º µî·Ï
+    builder.Services.ConfigureBlobStorage(builder.Configuration);   // Blob Storage ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿?
+    builder.Services.ConfigureFirebaseSDK(builder.Configuration);   // Firebase Admin SDK ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿?
 
-    // Presentation Layer¿¡¼­ ControllerBase »ó¼Ó °¡´ÉÇÏµµ·Ï
+    // Presentation Layerï¿½ï¿½ï¿½ï¿½ ControllerBase ï¿½ï¿½ï¿?ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½
     builder.Services.AddControllers()
                     .AddApplicationPart(typeof(EveryPinApi.Presentation.AssemblyReference).Assembly);
 
@@ -60,11 +60,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureIdentity();
     builder.Services.ConfigureJWT(builder.Configuration);
 
-    // À¯Àú claim Á¢±Ù
+    // ï¿½ï¿½ï¿½ï¿½ claim ï¿½ï¿½ï¿½ï¿½
     builder.Services.AddHttpContextAccessor();
-
-    // AutoMapper
-    builder.Services.AddAutoMapper(typeof(Program));
 }
 
 var app = builder.Build();
@@ -88,7 +85,7 @@ var app = builder.Build();
         ForwardedHeaders = ForwardedHeaders.All
     });
 
-    //app.UseDeveloperExceptionPage(); // µð¹ö±ë¿ëµµ. È°¼ºÈ­ ½Ã, ±Û·Î¹ú ·Î±ëÀ¸·Î ÁøÀÔ X
+    //app.UseDeveloperExceptionPage(); // ï¿½ï¿½ï¿½ï¿½ï¿½ëµµ. È°ï¿½ï¿½È­ ï¿½ï¿½, ï¿½Û·Î¹ï¿½ ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ X
 
     // auth
     app.UseAuthentication();
