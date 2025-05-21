@@ -7,8 +7,6 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Service.Contracts.Models;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +17,7 @@ using System.Threading.Tasks;
 using System.Reflection.Metadata.Ecma335;
 using Entites.Code;
 using Google.Apis.PeopleService.v1.Data;
+using Shared.Dtos.Common;
 
 namespace Service.Models;
 

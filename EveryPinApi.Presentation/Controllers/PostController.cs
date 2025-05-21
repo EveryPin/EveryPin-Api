@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.InputDto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Shared.Dtos.Post.Requests;
+using Shared.Dtos.Post.Responses;
+using Shared.Dtos.Comment.Requests;
+using Shared.Dtos.Comment.Responses;
+using Shared.Dtos.Like.Responses;
+using Shared.Dtos.Like.Requests;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EveryPinApi.Presentation.Controllers;
 
@@ -36,47 +35,42 @@ public class PostController : ControllerBase
     /// <param name="postId"></param>
     /// <returns></returns>
     [HttpGet("{postId:int}", Name = "GetPostById")]
-    [ProducesDefaultResponseType(typeof(PostDto))]
+    [ProducesDefaultResponseType(typeof(PostDetailResponse))]
     public async Task<IActionResult> GetPost(int postId)
     {
         var post = await _service.PostService.GetPost(postId, trackChanges: false);
-
         return Ok(post);
     }
 
     /// <summary>
     /// 게시글 작성
     /// </summary>
-    /// <param name="inputPost"></param>
+    /// <param name="createPostRequest"></param>
     /// <returns></returns>
     [HttpPost]
     [Authorize(Roles = "NormalUser")]
-    public async Task<IActionResult> CreatePost([FromForm] CreatePostInputDto inputPost)
+    public async Task<IActionResult> CreatePost([FromForm] CreatePostRequest createPostRequest)
     {
-        CreatePostDto post = new();
-        post.SetInputDto(inputPost);
-
-        if (post is null)
+        if (createPostRequest is null)
             return BadRequest("게시글의 내용이 비었습니다.");
+            
+        // 로그인 유저 ID
+        string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // 로그인 유저 ID로 생성하도록 처리
-        post.UserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var createPost = await _service.PostService.CreatePost(post);
-
-        return CreatedAtRoute("GetPostById", new { postId = createPost.PostId }, createPost);
+        var createdPost = await _service.PostService.CreatePost(createPostRequest, userId);
+        return CreatedAtRoute("GetPostById", new { postId = createdPost.PostId }, createdPost);
     }
 
     /// <summary>
     /// 게시글 수정
     /// </summary>
     /// <param name="postId"></param>
-    /// <param name="inputPost"></param>
+    /// <param name="updatePostRequest"></param>
     /// <returns></returns>
     [HttpPatch("{postId:int}", Name = "UpdatePost")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> UpdatePost(int postId,
-                                               [FromBody] CreatePostInputDto inputPost)
+                                               [FromBody] UpdatePostRequest updatePostRequest)
     {
         return StatusCode(501);
     }
@@ -107,13 +101,12 @@ public class PostController : ControllerBase
         if (postId <= 0)
             return BadRequest("postId 값이 비정상입니다.");
 
-        string UserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        CreateLikeDto like = new CreateLikeDto(postId, UserId);
-
-        var createLike = await _service.LikeService.CreateLike(like);
-
-        return CreatedAtRoute("GetLikeToPostId", new { postId = createLike.PostId }, createLike);
+        var createLikeRequest = new CreateLikeRequest { PostId = postId };
+        var createdLike = await _service.LikeService.CreateLike(userId, createLikeRequest);
+        
+        return CreatedAtRoute("GetLikeToPostId", new { postId = createdLike.PostId }, createdLike);
     }
 
     /// <summary>
@@ -138,13 +131,12 @@ public class PostController : ControllerBase
     /// <param name="size"></param>
     /// <returns></returns>
     [HttpGet("{postId:int}/comment", Name = "GetCommentToPostId")]
-    [ProducesDefaultResponseType(typeof(CommentDto))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<CommentResponse>))]
     public async Task<IActionResult> GetCommentToPostId(int postId,
                                                        [FromQuery] int page,
                                                        [FromQuery] int size)
     {
         var comments = await _service.CommentService.GetCommentToPostId(postId, trackChanges: false);
-    
         return Ok(comments);
     }
 
@@ -152,25 +144,25 @@ public class PostController : ControllerBase
     /// 댓글 작성
     /// </summary>
     /// <param name="postId"></param>
-    /// <param name="commentMessage"></param>
+    /// <param name="createCommentRequest"></param>
     /// <returns></returns>
     [HttpPost("{postId:int}/comment", Name = "CreateComment")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> CreateComment(int postId,
-                                                   [FromBody] string commentMessage)
+                                                   [FromBody] CreateCommentRequest createCommentRequest)
     {
-        if (string.IsNullOrEmpty(commentMessage))
+        if (string.IsNullOrEmpty(createCommentRequest.CommentMessage))
             return BadRequest("댓글 내용이 작성되지 않았습니다.");
         else if (postId <= 0)
             return BadRequest("PostId 값이 비정상입니다.");
     
-        string UserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-    
-        CreateCommentDto comment = new CreateCommentDto(postId, UserId, commentMessage);
-    
-        var createComment = await _service.CommentService.CreateComment(comment);
-    
-        return CreatedAtRoute("GetCommentToPostId", new { postId = createComment.PostId }, createComment);
+        string userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        // PostId 설정
+        createCommentRequest.PostId = postId;
+
+        var createdComment = await _service.CommentService.CreateComment(userId, createCommentRequest);
+        return CreatedAtRoute("GetCommentToPostId", new { postId = createdComment.PostId }, createdComment);
     }
 
     /// <summary>
@@ -178,13 +170,13 @@ public class PostController : ControllerBase
     /// </summary>
     /// <param name="postId"></param>
     /// <param name="commentId"></param>
-    /// <param name="commentMessage"></param>
+    /// <param name="updateCommentRequest"></param>
     /// <returns></returns>
     [HttpPatch("{postId:int}/comment/{commentId:int}", Name = "UpdateComment")]
     [Authorize(Roles = "NormalUser")]
     public async Task<IActionResult> UpdateComment(int postId,
                                                    int commentId,
-                                                   [FromBody] string commentMessage)
+                                                   [FromBody] UpdateCommentRequest updateCommentRequest)
     {
         return StatusCode(501);
     }

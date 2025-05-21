@@ -1,16 +1,15 @@
 ﻿using Contracts.Repository;
-using Shared.DataTransferObject;
 using Service.Contracts.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using Entites.Models;
 using Microsoft.Extensions.Logging;
 using Entites.Exceptions;
-using System.ComponentModel.Design;
+using Shared.Dtos.Comment.Responses;
+using Shared.Dtos.Comment.Requests;
 
 namespace Service.Models;
 
@@ -18,46 +17,88 @@ internal sealed class CommentService : ICommentService
 {
     private readonly ILogger _logger;
     private readonly IRepositoryManager _repository;
-    private readonly IMapper _mapper;
 
-    public CommentService(ILogger<CommentService> logger, IRepositoryManager repository, IMapper mapper)
+    public CommentService(ILogger<CommentService> logger, IRepositoryManager repository)
     {
         _logger = logger;
         _repository = repository;
-        _mapper = mapper;
     }
 
-    public async Task<IEnumerable<CommentDto>> GetAllComment(bool trackChanges)
+    public async Task<IEnumerable<CommentResponse>> GetAllComment(bool trackChanges)
     {
         var comments = await _repository.Comment.GetAllComment(trackChanges);
-        //var commentsDto = comments.Select(c => new CommentDto(c.Id, c.UserId, c.CommentMessage, c.CreatedDate)).ToList();
-        var commentsDto = _mapper.Map<IEnumerable<CommentDto>>(comments);
+        var commentResponses = new List<CommentResponse>();
+        
+        foreach (var comment in comments)
+        {
+            commentResponses.Add(new CommentResponse
+            {
+                CommentId = comment.CommentId,
+                PostId = comment.PostId,
+                UserId = comment.UserId,
+                CommentMessage = comment.CommentMessage,
+                UpdateDate = comment.UpdateDate,
+                CreatedDate = comment.CreatedDate
+            });
+        }
 
-        return commentsDto;
+        return commentResponses;
     }
 
-    public async Task<IEnumerable<CommentDto>> GetCommentToPostId(int postId, bool trackChanges)
+    public async Task<IEnumerable<CommentResponse>> GetCommentToPostId(int postId, bool trackChanges)
     {
         var post = await _repository.Post.GetPostById(postId, trackChanges);
 
         if (post is null)
             throw new PostNotFoundException(postId);
 
-        var commentsFromDb = await _repository.Comment.GetCommentByPostId(postId, trackChanges);
-        var commentsDto = _mapper.Map<IEnumerable<CommentDto>>(commentsFromDb);
+        var comments = await _repository.Comment.GetCommentByPostId(postId, trackChanges);
+        var commentResponses = new List<CommentResponse>();
+        
+        foreach (var comment in comments)
+        {
+            commentResponses.Add(new CommentResponse
+            {
+                CommentId = comment.CommentId,
+                PostId = comment.PostId,
+                UserId = comment.UserId,
+                CommentMessage = comment.CommentMessage,
+                UpdateDate = comment.UpdateDate,
+                CreatedDate = comment.CreatedDate
+            });
+        }
 
-        return commentsDto;
+        return commentResponses;
     }
 
-    public async Task<CommentDto> CreateComment(CreateCommentDto comment)
+    public async Task<CommentResponse> CreateComment(string userId, CreateCommentRequest comment)
     {
-        var commentEntity = _mapper.Map<Comment>(comment);
+        var user = await _repository.User.GetUserById(userId, false);
+        var post = await _repository.Post.GetPostById(comment.PostId, false);
+
+        var commentEntity = new Comment
+        {
+            PostId = comment.PostId,
+            Post = post,
+            UserId = userId,
+            User = user,
+            CommentMessage = comment.CommentMessage,
+            CreatedDate = DateTime.Now
+        };
 
         _repository.Comment.CreateComment(commentEntity);
         await _repository.SaveAsync();
 
-        var commentToReturn = _mapper.Map<CommentDto>(commentEntity);
+        var commentResponse = new CommentResponse
+        {
+            CommentId = commentEntity.CommentId,
+            PostId = commentEntity.PostId,
+            UserId = commentEntity.UserId,
+            CommentMessage = commentEntity.CommentMessage,
+            UpdateDate = commentEntity.UpdateDate,
+            CreatedDate = commentEntity.CreatedDate
+        };
 
-        return commentToReturn;
+        return commentResponse;
     }
 }

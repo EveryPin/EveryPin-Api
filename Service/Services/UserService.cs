@@ -1,11 +1,10 @@
-﻿using AutoMapper;
-using Contracts.Repository;
+﻿using Contracts.Repository;
 using Entites.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Service.Contracts.Models;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.Auth;
+using Shared.Dtos.Common;
+using Shared.Dtos.User.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,48 +17,55 @@ internal sealed class UserService : IUserService
 {
     private readonly ILogger _logger;
     private readonly IRepositoryManager _repository;
-    private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
 
-    public UserService(ILogger<UserService> logger, IRepositoryManager repository, UserManager<User> userManager, IMapper mapper)
+    public UserService(ILogger<UserService> logger, IRepositoryManager repository, UserManager<User> userManager)
     {
         _logger = logger;
         _repository = repository;
         _userManager = userManager;
-        _mapper = mapper;
     }
 
     public async Task<User> RegistNewUser(SingleSignOnUserInfo userInfo, string fcmToken)
     {
-        var newUser = new RegistUserDto
+        if (string.IsNullOrWhiteSpace(userInfo.UserNickName) || string.IsNullOrWhiteSpace(userInfo.UserEmail))
+            throw new ArgumentException("유효하지 않은 사용자 정보입니다.");
+
+        // 필수 필드가 있는 User 객체 초기화하기 전에 CodeOAuthPlatform 가져오기
+        var platformCode = userInfo.PlatformCode;
+        var codeOAuthPlatform = await _repository.CodeOAuthPlatform.GetByIdAsync((int) platformCode, false);
+        
+        if (codeOAuthPlatform == null)
+            throw new Exception($"지원되지 않는 플랫폼 코드: {platformCode}");
+
+        // 필수 필드가 있는 User 객체 초기화
+        var newUser = new User
         {
-            Name = userInfo.UserNickName,
+            Id = Guid.NewGuid().ToString(),
             UserName = userInfo.UserNickName,
             Email = userInfo.UserEmail,
-            Password = "0",
-            PlatformCode = (int)userInfo.PlatformCode,
+            PlatformCode = (int) platformCode,
+            CodeOAuthPlatform = codeOAuthPlatform,
             FcmToken = fcmToken,
-            Roles = new List<string> { "NormalUser" },
-            CreatedDate = DateTime.Now
+            CreatedDate = DateTime.UtcNow,
+            LastLoginDate = DateTime.UtcNow,
+            DeleteCheck = false,
+            RefreshTokenExpiryTime = DateTime.UtcNow
         };
 
-        var user = _mapper.Map<User>(newUser);
-
-        user.Profile = new Entites.Models.Profile()
-        {
-            UserId = user.Id,
-            ProfileDisplayId = userInfo.UserEmail.Split('@')[0],
-            ProfileName = user.UserName,
-            CreatedDate = DateTime.Now,
-            User = user
-        };
-
-        var userCreateResult = await _userManager.CreateAsync(user, newUser.Password);
+        // Identity를 통한 사용자 생성
+        var userCreateResult = await _userManager.CreateAsync(newUser, "0");
 
         if (userCreateResult.Succeeded)
-            await _userManager.AddToRolesAsync(user, newUser.Roles);
+        {
+            // 기본 사용자 역할 추가
+            await _userManager.AddToRoleAsync(newUser, "NormalUser");
+        }
         else
-            throw new Exception("회원가입 실패");
+        {
+            _logger.LogError("회원가입 실패: {Errors}", string.Join(", ", userCreateResult.Errors.Select(e => e.Description)));
+            throw new Exception("회원가입 실패: " + string.Join(", ", userCreateResult.Errors.Select(e => e.Description)));
+        }
 
         return await this.GetUserByEmail(userInfo.UserEmail, false);
     }

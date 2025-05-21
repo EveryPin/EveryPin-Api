@@ -1,4 +1,5 @@
-﻿using Shared.DataTransferObject;
+﻿using Shared.Dtos.Like.Responses;
+using Shared.Dtos.Like.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Service.Contracts.Models;
 
 public interface ILikeService
 {
-    Task<IEnumerable<LikeDto>> GetAllLike(bool trackChanges);
-    Task<IEnumerable<LikeDto>> GetLikeToPostId(int postId, bool trackChanges);
+    Task<IEnumerable<LikeResponse>> GetAllLike(bool trackChanges);
+    Task<IEnumerable<LikeResponse>> GetLikeToPostId(int postId, bool trackChanges);
     Task<int> GetLikeCountToPostId(int postId, bool trackChanges);
-    Task<LikeDto> CreateLike(CreateLikeDto like);
+    Task<LikeResponse> CreateLike(string userId, CreateLikeRequest like);
 }

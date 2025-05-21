@@ -1,9 +1,7 @@
-﻿using AutoMapper;
-using Entites.Models;
+﻿using Entites.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Service.Contracts.Models;
-using Shared.DataTransferObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,36 +11,40 @@ using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
-using Shared.DataTransferObject.Auth;
 using System.Security.Cryptography;
+using Shared.Dtos.Common;
 
 namespace Service.Models;
 
 internal sealed class AuthenticationService : IAuthenticationService
 {
     private readonly ILogger<AuthenticationService> _logger;
-    private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
     private User? _user;
 
-    public AuthenticationService(ILogger<AuthenticationService> logger, IMapper mapper,
+    public AuthenticationService(ILogger<AuthenticationService> logger,
                                 UserManager<User> userManager, IConfiguration configuration)
     {
         _logger = logger;
-        _mapper = mapper;
         _userManager = userManager;
         _configuration = configuration;
     }
 
-    public async Task<IdentityResult> RegisterUser(RegistUserDto registUserDto)
-    {
-        var user = _mapper.Map<User>(registUserDto);
-        var result = await _userManager.CreateAsync(user, registUserDto.Password ?? "0");
-        if (result.Succeeded)
-            await _userManager.AddToRolesAsync(user, registUserDto.Roles);
-        return result;
-    }
+    //public async Task<IdentityResult> RegisterUser(RegistUserDto registUserDto)
+    //{
+    //    var user = new User
+    //    {
+    //        Email = registUserDto.Email,
+    //        UserName = registUserDto.UserName,
+    //        // 필요한 다른 속성 매핑
+    //    };
+    //
+    //    var result = await _userManager.CreateAsync(user, registUserDto.Password ?? "0");
+    //    if (result.Succeeded)
+    //        await _userManager.AddToRolesAsync(user, registUserDto.Roles);
+    //    return result;
+    //}
 
     public async Task<bool> ValidateUser(string userEmail)
     {

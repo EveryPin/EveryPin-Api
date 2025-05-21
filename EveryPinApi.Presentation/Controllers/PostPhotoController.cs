@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Entites.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using Shared.DataTransferObject;
+using Shared.Dtos.Post.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,34 +31,38 @@ public class PostPhotoController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "NormalUser")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoResponse>))]
     public async Task<IActionResult> GetAllPostPhoto()
     {
         var postPhotos = await _service.PostPhotoService.GetAllPostPhoto(trackChanges: false);
-        return Ok(postPhotos);
+
+        var postPhotoResponses = postPhotos.Select(p => new PostPhotoResponse
+        {
+            PostPhotoId = p.PostPhotoId,
+            PostId = p.PostId,
+            PhotoUrl = p.PhotoUrl,
+            UpdateDate = p.UpdateDate,
+            CreatedDate = p.CreatedDate,
+        }).ToList();
+        
+        return Ok(postPhotoResponses);
     }
 
     [HttpGet("{postId:int}", Name = "GetPostPhotoById")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostPhotoResponse>))]
     public async Task<IActionResult> GetPostPhotoToPostId(int postId)
     {
         var postPhotos = await _service.PostPhotoService.GetPostPhotoToPostId(postId, trackChanges: false);
+        
+        var postPhotoResponses = postPhotos.Select(p => new PostPhotoResponse
+        {
+            PostPhotoId = p.PostPhotoId,
+            PostId = p.PostId,
+            PhotoUrl = p.PhotoUrl,
+            UpdateDate = p.UpdateDate,
+            CreatedDate = p.CreatedDate,
+        }).ToList();
 
-        return Ok(postPhotos);
-    }
-
-    [HttpPost]
-    [Authorize(Roles = "NormalUser")]
-    public async Task<IActionResult> CreatePostPhoto([FromBody] CreatePostPhotoDto postPhotoDto)
-    {
-        if (postPhotoDto is null)
-            return BadRequest("게시글 사진 데이터가 빈 값입니다.");
-
-        string UserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-
-        var createPostPhoto = await _service.PostPhotoService.CreatePostPhoto(postPhotoDto);
-
-        return CreatedAtRoute("GetPostPhotoById", new { postId = createPostPhoto.PostPhotoId }, createPostPhoto);
+        return Ok(postPhotoResponses);
     }
 }

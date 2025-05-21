@@ -9,14 +9,20 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Contracts;
-using Shared.DataTransferObject;
-using Shared.DataTransferObject.Auth;
+using Shared.Dtos.Auth.Requests;
+using Shared.Dtos.Auth.Responses;
+using Shared.Dtos.User.Requests;
+using Shared.Dtos.Post.Responses;
+using Shared.Dtos.Profile.Responses;
+using Shared.Dtos.Like.Responses;
+using Shared.Dtos.Common.Blob.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.Dtos.Common;
 
 namespace EveryPinApi.Presentation.Controllers;
 
@@ -40,57 +46,17 @@ public class TestApiController : ControllerBase
     }
 
     #region 로그인 테스트
-    [HttpPost("auth/regist")]
-    //[ServiceFilter(typeof(ValidationFilterAttribute))]        
-    public async Task<IActionResult> RegisterUser([FromBody] RegistUserDto registUserDto)
-    {
-        var result = await _service.AuthenticationService.RegisterUser(registUserDto);
-
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.TryAddModelError(error.Code, error.Description);
-            }
-            return BadRequest(ModelState);
-        }
-
-        var userAccountInfo = await _service.UserService.GetUserByEmail(registUserDto.Email, false);
-
-        var profile = new Entites.Models.Profile()
-        {
-            UserId = userAccountInfo.Id,
-            ProfileDisplayId = registUserDto.Email.Split('@')[0],
-            ProfileName = registUserDto.UserName,
-            SelfIntroduction = null,
-            PhotoUrl = null,
-            User = userAccountInfo,
-            CreatedDate = DateTime.Now
-        };
-
-        var createdProfile = await _service.ProfileService.CreateProfile(profile);
-
-        if (createdProfile != null)
-        {
-            return StatusCode(201);
-        }
-        else
-        {
-            return BadRequest("createdProfile가 null입니다.");
-        }
-    }
-
     [HttpPost("auth/login")]
-    [ProducesDefaultResponseType(typeof(TokenDto))]
-    public async Task<IActionResult> Authenticate([FromBody] UserAutenticationDto user)
+    public async Task<IActionResult> Authenticate([FromBody] string userEmail)
     {
-        if (!await _service.AuthenticationService.ValidateUser(user.Email))
+        var userInfo = await _service.UserService.GetUserByEmail(userEmail, false);
+
+        if (!await _service.AuthenticationService.ValidateUser(userEmail))
             return Unauthorized();
 
         var tokenDto = await _service.AuthenticationService.CreateToken(populateExp: true);
-
+        
         return Ok(tokenDto);
-
     }
 
     [HttpGet("auth/kakao-web-login")]
@@ -101,7 +67,7 @@ public class TestApiController : ControllerBase
         string kakaoAccessToken = await _service.SingleSignOnService.GetKakaoAccessToken(code);
 
         // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, kakaoAccessToken);
+        var userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, kakaoAccessToken);
         if (userInfo == null) throw new UnauthorizedAccessException("SSO 인증 실패");
 
         // 사용자 검증 및 회원가입
@@ -114,6 +80,7 @@ public class TestApiController : ControllerBase
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);
+        
         return Ok(tokenDto);
     }
 
@@ -125,7 +92,7 @@ public class TestApiController : ControllerBase
         string googleAccessToken = await _service.SingleSignOnService.GetGoogleAccessToken(code);
 
         // 액세스 토큰을 이용하여 플랫폼에서 유저 정보 받아오기
-        SingleSignOnUserInfo userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, googleAccessToken);
+        var userInfo = await _service.SingleSignOnService.GetUserInfo(platformCode, googleAccessToken);
         if (userInfo == null) throw new UnauthorizedAccessException("SSO 인증 실패");
 
         // 사용자 검증 및 회원가입
@@ -138,6 +105,7 @@ public class TestApiController : ControllerBase
         }
 
         var tokenDto = await _service.AuthenticationService.CreateTokenWithUpdateFcmToken("", populateExp: true);
+        
         return Ok(tokenDto);
     }
     #endregion
@@ -147,7 +115,15 @@ public class TestApiController : ControllerBase
     public async Task<IActionResult> TestGetAllBlob()
     {
         var result = await _blobHandlingService.ListAsync();
-        return Ok(result);
+        
+        var blobResponses = result.Select(r => new BlobResponse
+        {
+            IsSuccess = r.Uri != null,
+            Message = r.Uri != null ? "Blob 조회 성공" : "Blob 조회 실패",
+            FileUrl = r.Uri
+        }).ToList();
+        
+        return Ok(blobResponses);
     }
 
     [HttpPost("blob/upload-blob")]
@@ -155,10 +131,17 @@ public class TestApiController : ControllerBase
     {
         var result = await _blobHandlingService.UploadAsync(file);
 
+        var blobResponse = new BlobResponse
+        {
+            IsSuccess = !result.Error,
+            Message = result.Message,
+            FileUrl = result.Blob?.Uri
+        };
+
         if (result.Error)
-            return StatusCode(415, result);
+            return StatusCode(415, blobResponse);
         else
-            return Ok(result);
+            return Ok(blobResponse);
     }
 
     [HttpGet("blob/download-blob")]
@@ -172,17 +155,27 @@ public class TestApiController : ControllerBase
     public async Task<IActionResult> TestDeleteToBlobStorage(string fileName)
     {
         var result = await _blobHandlingService.DeleteAsync(fileName);
-        return Ok(result);
+        
+        // 기존 응답을 새 DTO로 변환
+        var blobResponse = new BlobResponse
+        {
+            IsSuccess = !result.Error,
+            Message = result.Message,
+            FileUrl = null
+        };
+        
+        return Ok(blobResponse);
     }
     #endregion
 
     #region 게시글 테스트
     [HttpGet("post/all")]
     [Authorize(Roles = "NormalUser")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<PostDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<PostResponse>))]
     public async Task<IActionResult> GetAllPost()
     {
         var posts = await _service.PostService.GetAllPost(trackChanges: false);
+        
         return Ok(posts);
     }
     #endregion
@@ -190,20 +183,39 @@ public class TestApiController : ControllerBase
     #region 좋아요 테스트
     [HttpGet("like/all")]
     [Authorize(Roles = "NormalUser")]
-    [ProducesDefaultResponseType(typeof(LikeDto))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<LikeResponse>))]
     public async Task<IActionResult> GetAllLike()
     {
         var likes = await _service.LikeService.GetAllLike(trackChanges: false);
-        return Ok(likes);
+        
+        // 기존 DTO를 새 DTO로 변환
+        var likeResponses = likes.Select(l => new LikeResponse
+        {
+            LikeId = l.LikeId,
+            PostId = l.PostId,
+            UserId = l.UserId,
+            CreatedDate = l.CreatedDate
+        }).ToList();
+        
+        return Ok(likeResponses);
     }
 
     [HttpGet("like/{postId:int}", Name = "GetLikeToPostId")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<LikeDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<LikeResponse>))]
     public async Task<IActionResult> GetLikeToPostId(int postId)
     {
-        var likeNum = await _service.LikeService.GetLikeToPostId(postId, trackChanges: false);
+        var likes = await _service.LikeService.GetLikeToPostId(postId, trackChanges: false);
+        
+        // 기존 DTO를 새 DTO로 변환
+        var likeResponses = likes.Select(l => new LikeResponse
+        {
+            LikeId = l.LikeId,
+            PostId = l.PostId,
+            UserId = l.UserId,
+            CreatedDate = l.CreatedDate
+        }).ToList();
 
-        return Ok(likeNum);
+        return Ok(likeResponses);
     }
 
     [HttpGet("like/num/{postId:int}", Name = "GetLikeNumToPostId")]
@@ -222,10 +234,11 @@ public class TestApiController : ControllerBase
 
     #region 프로필 테스트
     [HttpGet("profile/all")]
-    [ProducesDefaultResponseType(typeof(IEnumerable<ProfileDto>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<ProfileResponse>))]
     public async Task<IActionResult> GetAllProfile()
     {
         var profiles = await _service.ProfileService.GetAllProfile(trackChanges: false);
+        
         return Ok(profiles);
     }
     #endregion
@@ -259,7 +272,5 @@ public class TestApiController : ControllerBase
 
         return Ok(result);
     }
-
-
     #endregion
 }
