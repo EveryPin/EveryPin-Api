@@ -12,6 +12,7 @@ public interface IPostService
 {
     Task<IEnumerable<PostResponse>> GetAllPost(bool trackChanges);
     Task<PostDetailResponse> GetPost(int postId, bool trackChanges);
+    Task<IEnumerable<PostDetailResponse>> GetPostToProfileDisplayId(string profileDisplayId, bool trackChanges);
     Task<PostResponse> CreatePost(Shared.Dtos.Post.Requests.CreatePostRequest post, string userId);
     Task<IEnumerable<PostDetailResponse>> GetSearchPost(double x, double y, double range, bool trackChanges);
 }

@@ -12,5 +12,6 @@ public interface IPostRepository
     Task<IEnumerable<Post>> GetAllPost(bool trackChanges);
     Task<Post> GetPostById(int postId, bool trackChanges);
     Task<IEnumerable<Post>> GetSearchPost(double x, double y, double range, bool trackChanges);
+    Task<IEnumerable<Post>> GetPostToProfileDisplayId(string profileDisplayId, bool trackChanges);
     void CreatePost(Post post);
 }

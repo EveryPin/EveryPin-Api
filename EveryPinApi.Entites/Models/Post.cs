@@ -21,7 +21,7 @@ public class Post
     public DateTime CreatedDate { get; set; }
 
     [ForeignKey("UserId")]
-    public virtual required User User { get; set; }
+    public virtual User? User { get; set; }
     public virtual ICollection<PostPhoto> PostPhotos { get; set; } = new List<PostPhoto>();
     public virtual ICollection<Like> Likes { get; } = new List<Like>();    
     public virtual ICollection<Comment> Comments { get; } = new List<Comment>();
