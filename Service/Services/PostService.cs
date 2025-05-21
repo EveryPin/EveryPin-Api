@@ -93,57 +93,70 @@ internal sealed class PostService : IPostService
         return postDetailResponses;
     }
 
+    public async Task<IEnumerable<PostDetailResponse>> GetPostToProfileDisplayId(string profileDisplayId, bool trackChanges)
+    {
+        var posts = await _repository.Post.GetPostToProfileDisplayId(profileDisplayId, trackChanges);
+        var postDetailResponses = new List<PostDetailResponse>();
+
+        foreach (var post in posts)
+        {
+            int likeCount = await _repository.Like.GetLikeCountByPostId(post.PostId, trackChanges);
+            var writerProfile = await _repository.Profile.GetProfileByUserId(post.UserId, trackChanges);
+
+            var postDetailResponse = new PostDetailResponse();
+            postDetailResponses.Add(postDetailResponse.FromEntity(post, likeCount, writerProfile));
+        }
+
+        return postDetailResponses;
+    }
+
     public async Task<PostResponse> CreatePost(CreatePostRequest post, string userId)
     {
+        // 사용자 정보 조회
         var user = await _repository.User.GetUserById(userId, false);
         if (user == null)
             throw new Exception($"User with id: {userId} does not exist in the database.");
 
+        // Post 엔티티 생성
         var postEntity = new Post
         {
             UserId = userId,
-            User = user,
             PostContent = post.PostContent,
             X = (float?)post.X,
             Y = (float?)post.Y,
             CreatedDate = DateTime.Now
         };
-        
-        List<PostPhoto> postPhotos = new();
-        bool isUploadSuccess = false;
 
-        if (post.PhotoFiles != null)
+        // 업로드된 사진 처리
+        var postPhotos = new List<PostPhoto>();
+        if (post.PhotoFiles != null && post.PhotoFiles.Count > 0)
         {
             var postPhotoId = await _repository.PostPhoto.GetLatestPostPhotoId();
-
             foreach (var photo in post.PhotoFiles)
             {
+                // Blob 업로드 시도
                 var result = await _blobHandlingService.UploadPostPhotoAsync(++postPhotoId, photo);
-        
                 if (result.Error)
                 {
-                    isUploadSuccess = false;
-                    break;
+                    throw new Exception($"Photo upload failed: {result.Message}");
                 }
-                else
+                // PostPhoto 엔티티에 필수 정보 할당
+                var postPhoto = new PostPhoto
                 {
-                    var postPhoto = new PostPhoto
-                    {
-                        PhotoUrl = result.Blob.Uri
-                    };
-                    postPhotos.Add(postPhoto);
-
-                    isUploadSuccess = true;
-                }
+                    PhotoUrl = result.Blob.Uri,
+                    CreatedDate = DateTime.Now
+                };
+                postPhotos.Add(postPhoto);
             }
         }
 
-        if (isUploadSuccess || post.PhotoFiles == null)
-        {
-            postEntity.PostPhotos = postPhotos;
-            _repository.Post.CreatePost(postEntity);
-            await _repository.SaveAsync();
-        }
+        postEntity.PostPhotos = postPhotos;
+
+        _repository.Post.CreatePost(postEntity);
+        await _repository.SaveAsync();
+
+        int commentCount = postEntity.Comments?.Count ?? 0;
+        int likeCount = postEntity.Likes?.Count ?? 0;
 
         var postResponse = new PostResponse
         {
@@ -155,6 +168,8 @@ internal sealed class PostService : IPostService
             Y = postEntity.Y ?? 0,
             CreatedDate = postEntity.CreatedDate,
             UpdateDate = postEntity.UpdateDate,
+            CommentCount = commentCount,
+            LikeCount = likeCount,
             Photos = postEntity.PostPhotos?.Select(p => new PostPhotoResponse
             {
                 PostPhotoId = p.PostPhotoId,

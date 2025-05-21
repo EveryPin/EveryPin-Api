@@ -27,11 +27,10 @@ public class MapController : ControllerBase
         return Ok(posts);
     }
 
-    [HttpGet("pin/{userId}", Name = "GetSearchUserPost")]
-    public async Task<IActionResult> GetSearchUserPost(string userId)
+    [HttpGet("pin/{profileDisplayId}", Name = "GetSearchUserPost")]
+    public async Task<IActionResult> GetSearchUserPost(string profileDisplayId)
     {
-        //var posts = await _service.PostService.GetSearchPost(userId, trackChanges: false);
-        //return Ok(posts);
-        return StatusCode(501);
+        var posts = await _service.PostService.GetPostToProfileDisplayId(profileDisplayId, trackChanges: false);
+        return Ok(posts);
     }
 }

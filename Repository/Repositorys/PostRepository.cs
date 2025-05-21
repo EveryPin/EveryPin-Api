@@ -38,6 +38,17 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
         return posts;
     }
 
+    public async Task<IEnumerable<Post>> GetPostToProfileDisplayId(string profileDisplayId, bool trackChanges)
+    {
+        var posts = await FindAll(trackChanges)
+            .Where(post => post.User.Profile.ProfileDisplayId == profileDisplayId)
+            .Include(post => post.PostPhotos)
+            .OrderByDescending(c => c.PostId)
+            .ToListAsync();
+
+        return posts;
+    }
+
     public void CreatePost(Post post) =>
         Create(post);
 }
