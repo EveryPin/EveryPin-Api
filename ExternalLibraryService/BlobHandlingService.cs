@@ -105,6 +105,37 @@ public class BlobHandlingService
         return response;
     }
 
+    public async Task<BlobResultDto> UploadImageByFileNameAsync(string blobFileName, IFormFile blob)
+    {
+        BlobResultDto response = new BlobResultDto();
+        BlobClient client = _blobContainer.GetBlobClient(blobFileName);
+        string contentType = "image/jpeg";
+
+        if (IsImageFile(blob))
+        {
+            await using (Stream? data = blob.OpenReadStream())
+            {
+                await client.UploadAsync(data); // 업로드
+                BlobHttpHeaders headers = new BlobHttpHeaders { ContentType = contentType };
+                await client.SetHttpHeadersAsync(headers);  // ContentType 변경
+            }
+            response.Message = $"{blob.FileName} 업로드 완료";
+            response.Error = false;
+            response.Blob.Uri = client.Uri.AbsoluteUri;
+            response.Blob.Name = client.Name;
+            response.Blob.ContentType = contentType;
+        }
+        else
+        {
+            response.Message = "이미지 파일만 업로드할 수 있습니다.";
+            response.Error = true;
+            response.Blob.Uri = null;
+            response.Blob.Name = null;
+            response.Blob.ContentType = null;
+        }
+        return response;
+    }
+
     public async Task<BlobResultDto> UploadPostPhotoAsync(int postPhotoId, IFormFile blob)
     {
         string blobFileName = $"PostPhoto_{postPhotoId}";

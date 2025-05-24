@@ -15,6 +15,7 @@ public class PostPhoto
     
     [ForeignKey(nameof(Post))]
     public int PostId { get; set; }
+    public string? PhotoFileName { get; set; }
 
     public string? PhotoUrl { get; set; }
     public DateTime? UpdateDate { get; set; }

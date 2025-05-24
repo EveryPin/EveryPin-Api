@@ -14,8 +14,10 @@ public class Profile
     public int ProfileId { get; set; }
     public required string UserId { get; set; }
     public required string ProfileDisplayId { get; set; }
-    public required string ProfileName { get; set; }
+    public string? ProfileName { get; set; }
     public string? SelfIntroduction { get; set; }
+    public string? OriginPhotoFileName { get; set; }
+    public string? UploadedPhotoFileName { get; set; }
     public string? PhotoUrl { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public required DateTime CreatedDate { get; set; }

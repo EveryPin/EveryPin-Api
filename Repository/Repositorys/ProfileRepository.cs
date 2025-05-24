@@ -26,10 +26,13 @@ public class ProfileRepository : RepositoryBase<Profile>, IProfileRepository
     public void UpdateProfile(Profile profile) =>
         Update(profile);
 
-    public async Task<Profile> GetProfileByUserId(string userId, bool trackChanges) =>
+    public async Task<Profile?> GetProfileByUserId(string userId, bool trackChanges) =>
         await FindByCondition(profile => profile.UserId.Equals(userId), trackChanges)
+        .Include(c => c.User)
         .SingleOrDefaultAsync();
-    public async Task<Profile> GetProfileByDisplayId(string profileDisplayId, bool trackChanges) =>
+
+    public async Task<Profile?> GetProfileByDisplayId(string profileDisplayId, bool trackChanges) =>
         await FindByCondition(profile => profile.ProfileDisplayId.Equals(profileDisplayId), trackChanges)
+        .Include(c => c.User)
         .SingleOrDefaultAsync();
 }

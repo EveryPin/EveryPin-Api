@@ -6,8 +6,9 @@ namespace Shared.Dtos.Profile.Requests;
 
 public class UpdateProfileRequest
 {
-    public string? ProfileDisplayId { get; set; }
-    public string? Name { get; set; }
+    public required string ProfileDisplayId { get; set; }
+    public required string Name { get; set; }
     public string? SelfIntroduction { get; set; }
     public IFormFile? PhotoFile { get; set; }
+    public bool IsPhotoUpload { get; set; }
 }
