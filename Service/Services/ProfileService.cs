@@ -85,28 +85,51 @@ internal sealed class ProfileService : IProfileService
 
     public async Task<ProfileResponse> UpdateProfile(string userId, UpdateProfileRequest updateProfile, bool trackChanges)
     {
-        Entites.Models.Profile originProfile = await _repository.Profile.GetProfileByUserId(userId, false);
+        Entites.Models.Profile? originProfile = await _repository.Profile.GetProfileByUserId(userId, false);
 
         if (originProfile != null)
         {
-            if (updateProfile.PhotoFile != null)
-            {
-                var uploadResult = await _blobHandlingService.UploadAsync(updateProfile.PhotoFile);
-                if (uploadResult.Error)
-                {
-                    throw new Exception("Blob upload failed: " + uploadResult.Message);
-                }
-                originProfile.PhotoUrl = uploadResult.Blob.Uri;
-            }
-
+            originProfile.ProfileDisplayId = updateProfile.ProfileDisplayId;
             originProfile.ProfileName = updateProfile.Name;
             originProfile.SelfIntroduction = updateProfile.SelfIntroduction;
+            originProfile.UpdatedDate = DateTime.Now;
+
+            // 프로필 수정 포함
+            if (updateProfile.IsPhotoUpload)
+            {
+                if (updateProfile.PhotoFile != null)
+                {
+                    // 프로필을 바꾸는 경우
+                    string fileName = $"Profile_{Guid.NewGuid()}";
+                    var uploadResult = await _blobHandlingService.UploadImageByFileNameAsync(fileName, updateProfile.PhotoFile);
+
+                    if (uploadResult.Error)
+                    {
+                        throw new Exception("Blob upload failed: " + uploadResult.Message);
+                    }
+
+                    originProfile.OriginPhotoFileName = updateProfile.PhotoFile.FileName;
+                    originProfile.UploadedPhotoFileName = fileName;
+                    originProfile.PhotoUrl = uploadResult.Blob.Uri;
+                }
+                else
+                {
+                    // 프로필을 내리는 경우
+                    originProfile.OriginPhotoFileName = null;
+                    originProfile.UploadedPhotoFileName = null;
+                    originProfile.PhotoUrl = null;
+                }
+            }
 
             _repository.Profile.UpdateProfile(originProfile);
             await _repository.SaveAsync();
-        }
 
-        var profileResponse = new ProfileResponse();
-        return profileResponse.FromEntity(originProfile);
+            var profileResponse = new ProfileResponse();
+            return profileResponse.FromEntity(originProfile)!;
+        }
+        else
+        {
+            throw new Exception("유저 프로필이 정상적으로 생성되지 않았습니다.");
+        }
     }
 }

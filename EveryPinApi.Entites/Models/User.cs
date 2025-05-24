@@ -22,7 +22,7 @@ public class User : IdentityUser
     public bool DeleteCheck { get; set; }
 
     [ForeignKey("PlatformCode")]
-    public virtual required CodeOAuthPlatform CodeOAuthPlatform { get; set; }
+    public virtual CodeOAuthPlatform? CodeOAuthPlatform { get; set; }
     public virtual Profile? Profile { get; set; }
     public virtual ICollection<Like> Like { get; set; } = new List<Like>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
