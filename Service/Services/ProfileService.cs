@@ -92,6 +92,7 @@ internal sealed class ProfileService : IProfileService
             originProfile.ProfileDisplayId = updateProfile.ProfileDisplayId;
             originProfile.ProfileName = updateProfile.Name;
             originProfile.SelfIntroduction = updateProfile.SelfIntroduction;
+            originProfile.UpdatedDate = DateTime.Now;
 
             // 프로필 수정 포함
             if (updateProfile.IsPhotoUpload)

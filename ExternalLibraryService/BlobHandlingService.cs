@@ -10,11 +10,20 @@ public class BlobHandlingService
 {
     private readonly BlobServiceClient _blobService;
     private readonly BlobContainerClient _blobContainer;
+    private static readonly Dictionary<string, string> ImageContentTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { ".jpg", "image/jpeg" },
+        { ".jpeg", "image/jpeg" },
+        { ".png", "image/png" },
+        { ".gif", "image/gif" },
+        { ".bmp", "image/bmp" }
+    };
+    private static readonly string[] SupportedImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+    private const string DefaultImageContentType = "application/octet-stream";
 
     #region 세팅
     public BlobHandlingService(string accessKey, string storageAccountName, string containerName)
     {
-
         _blobService = GetBlobServiceClient(storageAccountName, accessKey);
         _blobContainer = GetBlobContainerClient(containerName);
     }
@@ -33,12 +42,24 @@ public class BlobHandlingService
     {
         return _blobService.GetBlobContainerClient(containerName);
     }
-
-    //public BlobClient GetBlobClient(string blobName)
-    //{
-    //    return _blobContainer.GetBlobClient(blobName);
-    //}
     #endregion
+
+    /// <summary>
+    /// 파일 확장자에 따른 Content Type 반환
+    /// </summary>
+    /// <param name="fileName">파일 이름</param>
+    /// <returns>Content Type</returns>
+    private string GetContentType(string fileName)
+    {
+        string extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        if (ImageContentTypes.TryGetValue(extension, out string contentType))
+        {
+            return contentType;
+        }
+
+        return DefaultImageContentType;
+    }
 
     /// <summary>
     /// Blob Storage 컨테이너 내 모든 Blob List 반환
@@ -74,10 +95,12 @@ public class BlobHandlingService
     {
         BlobResultDto response = new BlobResultDto();
         BlobClient client = _blobContainer.GetBlobClient(blob.FileName);
-        string contentType = "image/jpeg";
 
-        if(blob is not null)
+        if (blob is not null)
         {
+            // 파일 확장자에 따른 Content Type 설정
+            string contentType = GetContentType(blob.FileName);
+
             await using (Stream? data = blob.OpenReadStream())
             {
                 await client.UploadAsync(data); // 업로드
@@ -109,10 +132,11 @@ public class BlobHandlingService
     {
         BlobResultDto response = new BlobResultDto();
         BlobClient client = _blobContainer.GetBlobClient(blobFileName);
-        string contentType = "image/jpeg";
 
         if (IsImageFile(blob))
         {
+            string contentType = GetContentType(blob.FileName);
+
             await using (Stream? data = blob.OpenReadStream())
             {
                 await client.UploadAsync(data); // 업로드
@@ -141,10 +165,11 @@ public class BlobHandlingService
         string blobFileName = $"PostPhoto_{postPhotoId}";
         BlobResultDto response = new BlobResultDto();
         BlobClient client = _blobContainer.GetBlobClient(blobFileName);
-        string contentType = "image/jpeg";
 
         if (IsImageFile(blob))
         {
+            string contentType = GetContentType(blob.FileName);
+
             await using (Stream? data = blob.OpenReadStream())
             {
                 await client.UploadAsync(data); // 업로드
@@ -174,14 +199,11 @@ public class BlobHandlingService
 
     private bool IsImageFile(IFormFile file)
     {
-        // 이미지 파일 확장자 목록
-        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-
         // 파일 확장자 확인
         string fileExtension = Path.GetExtension(file.FileName).ToLower();
 
         // 이미지 파일인지 확인
-        return imageExtensions.Contains(fileExtension);
+        return SupportedImageExtensions.Contains(fileExtension);
     }
 
     /// <summary>

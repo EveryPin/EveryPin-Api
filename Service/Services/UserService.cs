@@ -1,4 +1,5 @@
-﻿using Contracts.Repository;
+﻿using AutoMapper;
+using Contracts.Repository;
 using Entites.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -52,7 +53,7 @@ internal sealed class UserService : IUserService
             // 필수 필드가 있는 User 객체 초기화하기 전에 CodeOAuthPlatform 가져오기
             var platformCode = userInfo.PlatformCode;
             var codeOAuthPlatform = await _repository.CodeOAuthPlatform.GetByIdAsync((int)platformCode, false);
-            
+
             if (codeOAuthPlatform == null)
             {
                 _logger.LogError("지원되지 않는 플랫폼 코드: {PlatformCode}", platformCode);
@@ -73,21 +74,12 @@ internal sealed class UserService : IUserService
                 RefreshTokenExpiryTime = DateTime.UtcNow
             };
 
-            newUser.Profile = new Entites.Models.Profile()
-            {
-                UserId = newUser.Id,
-                ProfileDisplayId = userInfo.UserEmail.Split('@')[0],
-                ProfileName = newUser.UserName,
-                CreatedDate = DateTime.Now,
-                User = newUser
-            };
-
             // Identity를 통한 사용자 생성
             var userCreateResult = await _userManager.CreateAsync(newUser, "0");
 
             if (userCreateResult.Succeeded)
             {
-                // 기본 사용자 역할 추가
+                // 기본 사용자 역할 추가 (프로필 생성 전에 역할 할당)
                 var roleResult = await _userManager.AddToRoleAsync(newUser, "NormalUser");
                 if (!roleResult.Succeeded)
                 {
@@ -96,6 +88,19 @@ internal sealed class UserService : IUserService
                     await _userManager.DeleteAsync(newUser);
                     throw new InvalidOperationException("사용자 역할 할당 실패: " + string.Join(", ", roleResult.Errors.Select(e => e.Description)));
                 }
+
+                // 역할 할당 성공 후 프로필 생성
+                var newProfile = new Entites.Models.Profile()
+                {
+                    UserId = newUser.Id,
+                    ProfileDisplayId = userInfo.UserEmail.Split('@')[0],
+                    ProfileName = newUser.UserName,
+                    CreatedDate = DateTime.Now,
+                    User = newUser
+                };
+
+                _repository.Profile.CreateProfile(newProfile);
+                await _repository.SaveAsync();
 
                 _logger.LogInformation("새 사용자 등록 성공: {Email}", userInfo.UserEmail);
             }
@@ -117,9 +122,8 @@ internal sealed class UserService : IUserService
         }
         catch (Exception ex)
         {
-            // 모든 예외에 대한 로깅 처리
             _logger.LogError(ex, "사용자 등록 중 오류 발생: {Message}", ex.Message);
-            throw; // 예외 다시 던지기
+            throw;
         }
     }
 
